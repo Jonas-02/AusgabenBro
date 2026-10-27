@@ -7,23 +7,53 @@ Google-Tabelle als Datenbank.
 ## Wofür das gut ist
 
 Normale Tracker beantworten „wofür geht mein Geld weg". Diese App beantwortet
-zwei Fragen, die Standardtools nicht stellen:
+die Frage dahinter: **wie viel davon hätte nicht sein müssen** — und ob es von
+Monat zu Monat besser wird.
 
-1. **Wie nötig war das?** Jede Ausgabe bekommt eine Stufe von 0 (Fixkosten) bis
-   4 (Reue). Daraus entsteht die **Unnötig-Quote**: Anteil Impuls + Reue am
-   beeinflussbaren Teil deiner Ausgaben.
-2. **Für wen war das?** Nur ich / geteilt / für andere, optional mit Namen.
-   Daraus entsteht der **Spendabel-Saldo**: was du für andere zahlst, minus was
-   zurückkommt. Pro Person.
+Jede Ausgabe bekommt eine Notwendigkeitsstufe:
 
-Dazu der **Reue-Check**: Ausgaben, die mindestens 7 Tage alt sind, werden
-rückblickend mit 👍 / 😐 / 👎 bewertet. Der zeitliche Abstand ist Absicht —
-direkt nach dem Kauf fällt die Bewertung systematisch zu positiv aus.
-Aus diesen Urteilen entsteht das **Reue-Ranking**: welche Kategorien pro Euro
-die meiste Reue produzieren.
+| Stufe | Bedeutung |
+|---|---|
+| 0 Fix | Läuft automatisch: Miete, Versicherung, Abo |
+| 1 Nötig | Hätte so oder so sein müssen |
+| 2 Geplant | Bewusst gegönnt, kein Reue-Kandidat |
+| 3 Impuls | Spontan, hätte nicht sein müssen |
+| 4 Reue | Würde ich rückgängig machen |
 
-Daneben ist es ein vollständiger Tracker: Einnahmen, Fixkosten-Vorlagen,
-eigene Kategorien, Monatsnavigation, Suche, Export.
+Daraus entstehen drei Dinge:
+
+- **€ unnötig** (Leitmetrik): Summe aus Impuls + Reue. Bewusst der absolute
+  Euro-Betrag und nicht die Quote — die Quote kann sinken, während absolut
+  mehr Geld verbrennt. Am Monatsende fehlen Euro, keine Prozentpunkte.
+- **Reue-Check**: Ausgaben ab 7 Tagen Alter werden rückblickend mit
+  👍 / 😐 / 👎 bewertet. Der Abstand ist Absicht — direkt nach dem Kauf fällt
+  die Bewertung systematisch zu positiv aus.
+- **Stichwörter**: ein freies Wort pro Ausgabe („Zigaretten", „Lieferando").
+  Gleiche Wörter werden unabhängig von Schreibweise zusammengefasst.
+  Kategorien sind grob, Stichwörter sind die Ebene, auf der du entscheidest.
+
+## Die sechs Ansichten
+
+| Tab | Inhalt |
+|---|---|
+| **Erfassen** | Betrag → Kategorie → Stichwort → Notwendigkeit. Umschalter für Einnahmen. |
+| **Übersicht** | Kennzahlen des Monats, Verteilung nach Notwendigkeit, Kategorien, Stichwörter, Reue-Ranking |
+| **Vergleich** | Dieser Monat gegen Vormonat gegen Startmonat. Was ist teurer, was günstiger geworden — je Kategorie und je Stichwort. |
+| **Reue** | Eine Karte pro Ausgabe, rückblickende Bewertung |
+| **Liste** | Alle Buchungen des Monats, Suche und Filter |
+| **Setup** | Verbindung, Einkommen, Fixkosten, Kategorien, Export |
+
+Alles ist monatsbasiert. Die Baseline für den Vergleich ist automatisch der
+erste Monat, in dem etwas erfasst wurde.
+
+## Was automatisch passiert
+
+Beim ersten Öffnen in einem neuen Monat bucht die App dein hinterlegtes
+Einkommen und alle Fixkosten selbst und sagt es dir in einer Zeile mit
+Rückgängig-Knopf. Du startest also nie bei null, sondern mit dem fertigen
+Gerüst. Doppelbuchungen sind ausgeschlossen: gebucht wird nur, wenn der
+Abgleich mit der Tabelle erfolgreich war und der Posten in dem Monat noch
+nicht existiert.
 
 ## Einrichtung
 
@@ -48,24 +78,28 @@ eigene Kategorien, Monatsnavigation, Suche, Export.
      dein eigenes Script — über „Erweitert → Zu … wechseln" bestätigen).
 7. Die **Web-App-URL** kopieren. Sie endet auf `/exec`.
 
-Die vier Tabellenblätter (`Ausgaben`, `Einnahmen`, `Vorlagen`, `Config`) legt
-das Script beim ersten Zugriff selbst an.
+Die vier Tabellenblätter legt das Script beim ersten Zugriff selbst an.
+Fehlende Spalten ergänzt es bei jedem Zugriff — ein späteres Schema-Update
+braucht deshalb keine Migration von Hand.
 
 ### 2. App veröffentlichen
-
-GitHub Pages reicht und kostet nichts:
 
 1. Dateien ins Repository pushen.
 2. **Settings → Pages → Build and deployment**
    - Source: *Deploy from a branch*
    - Branch: `main`, Ordner `/ (root)` → Save
 3. Nach ein paar Minuten liegt die App unter
-   `https://<dein-name>.github.io/ausgabenbro/`.
+   `https://<dein-name>.github.io/AusgabenBro/`.
 
-### 3. Verbinden
+### 3. Onboarding
 
-App öffnen → Tab **Setup** → Web-App-URL und Token eintragen →
-**Verbinden & testen**. Der Punkt oben rechts wird grün.
+Beim ersten Start führt die App durch fünf Schritte: Verbindung, Einkommen,
+Fixkosten, Kategorien, fertig. Danach ist alles gespeichert, was sich nicht
+monatlich ändert. Wiederholbar über **Setup → Einrichtung erneut**.
+
+Zum Ausprobieren ohne Tabelle gibt es in Schritt 1 den Link
+„Erstmal ohne Tabelle ausprobieren" — dann bleiben die Daten nur in diesem
+Browser.
 
 ### 4. In Notion einbetten
 
@@ -95,10 +129,10 @@ Konfiguration im Link, überlebt sie das.
 
 | Blatt | Spalten |
 |---|---|
-| `Ausgaben` | id, erstellt, datum, betrag, kategorie, notwendigkeit (0–4), fuerWen (ich/geteilt/andere), person, notiz, reue (gut/neutral/schlecht), reueAm |
-| `Einnahmen` | id, erstellt, datum, betrag, typ (einkommen/erstattung), quelle, person, notiz |
-| `Vorlagen` | id, name, betrag, kategorie, notwendigkeit, tag, aktiv, zuletzt |
-| `Config` | key, value |
+| `Ausgaben` | id, erstellt, datum, betrag, kategorie, notwendigkeit (0–4), stichwort, reue (gut/neutral/schlecht), reueAm |
+| `Einnahmen` | id, erstellt, datum, betrag, quelle, notiz |
+| `Vorlagen` | id, name, betrag, kategorie, tag, aktiv, zuletzt |
+| `Config` | key, value — `kategorien`, `einkommen`, `onboarding`, `zuletztGebucht`, `abschlussGesehen` |
 
 Die Tabelle bleibt von Hand lesbar und bearbeitbar. Änderungen dort erscheinen
 beim nächsten Abgleich in der App.
@@ -117,8 +151,8 @@ wird alles nachgeschickt. Getestet inklusive Backend-Ausfall mitten im Betrieb.
 - Ungesendete Einträge liegen nur in dem Browser, in dem du sie erfasst hast,
   bis der nächste Abgleich klappt.
 - Apps-Script-Web-Apps haben Tageskontingente für Laufzeit. Für einen
-  persönlichen Tracker ist das unkritisch, bei Dauer-Polling wäre es das nicht —
-  die App gleicht deshalb nur bei Änderungen, beim Start und beim Tab-Wechsel ab.
+  persönlichen Tracker ist das unkritisch — die App gleicht nur bei Änderungen,
+  beim Start und beim Tab-Wechsel ab, nicht im Dauertakt.
 - Keine Bank-Anbindung. Erfassung ist manuell; das ist beim Thema
   Ausgabenbewusstsein eher Feature als Mangel, kostet aber Disziplin.
 
@@ -127,24 +161,26 @@ wird alles nachgeschickt. Getestet inklusive Backend-Ausfall mitten im Betrieb.
 ES-Module brauchen HTTP, `file://` reicht nicht:
 
 ```
-cd ausgabenbro
 python3 -m http.server 8080
 ```
 
-Dann `http://localhost:8080` öffnen.
-
 ```
-index.html              Gerüst aller fünf Ansichten
+index.html              Gerüst aller Ansichten plus Onboarding-Overlay
 assets/kern.js          Konstanten, Geld- und Datumslogik (alles in Cent)
 assets/daten.js         Cache, Warteschlange, Transport zum Backend
-assets/auswertung.js    Kennzahlen (Unnötig-Quote, Spendabel-Saldo, Ranking)
-assets/charts.js        Diagramme als HTML/CSS
-assets/app.js           Ansichten und Ereignisse
+assets/auswertung.js    Kennzahlen, Stichwort-Gruppierung, Monatsvergleich
+assets/charts.js        Diagramme und Vergleichsblöcke als HTML/CSS
+assets/app.js           Ansichten, Ereignisse, Onboarding, Automatikbuchung
 assets/style.css        Design-Token und Layout
 apps-script/Code.gs     Backend für Google Sheets
 ```
 
-### Farbwahl
+### Design
+
+Farben, Abstände und Radien liegen ausschließlich als CSS-Custom-Properties im
+`:root`-Block von `assets/style.css`, je einmal für hell und dunkel. Ein eigenes
+Designsystem ersetzt diesen Block; der Rest des Stylesheets referenziert nur
+Rollen, keine Hex-Werte.
 
 Die Notwendigkeits-Skala ist eine divergierende Skala (nötig ← neutral →
 unnötig) und wurde gegen Farbfehlsichtigkeit geprüft: benachbarte Stufen

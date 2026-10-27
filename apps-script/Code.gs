@@ -6,26 +6,28 @@
  *  2. Inhalt dieser Datei in Code.gs einfuegen und speichern
  *  3. Projekteinstellungen -> Scripteigenschaften -> Eigenschaft hinzufuegen
  *     Name:  AUSGABENBRO_TOKEN
- *     Wert:  ein langes, zufaelliges Passwort (z.B. 32 Zeichen)
+ *     Wert:  ein langes, zufaelliges Passwort (z.B. openssl rand -base64 24)
  *  4. Bereitstellen -> Neue Bereitstellung -> Typ "Web-App"
  *     Ausfuehren als: Ich
  *     Zugriff:        Jeder
- *  5. Die /exec-URL kopieren und zusammen mit dem Token in der App eintragen
+ *  5. Die /exec-URL kopieren und im Onboarding der App eintragen
  *
- * Das Anlegen der Tabellenblaetter passiert automatisch beim ersten Aufruf.
+ * Die Tabellenblaetter legt das Script beim ersten Zugriff selbst an. Fehlende
+ * Spalten werden bei jedem Zugriff ergaenzt - ein spaeteres Schema-Update
+ * braucht deshalb keine Migration von Hand.
  */
 
 var TOKEN_PROP = 'AUSGABENBRO_TOKEN';
 
 var SCHEMA = {
   Ausgaben:  ['id', 'erstellt', 'datum', 'betrag', 'kategorie', 'notwendigkeit',
-              'fuerWen', 'person', 'notiz', 'reue', 'reueAm'],
-  Einnahmen: ['id', 'erstellt', 'datum', 'betrag', 'typ', 'quelle', 'person', 'notiz'],
-  Vorlagen:  ['id', 'name', 'betrag', 'kategorie', 'notwendigkeit', 'tag', 'aktiv', 'zuletzt'],
+              'stichwort', 'reue', 'reueAm'],
+  Einnahmen: ['id', 'erstellt', 'datum', 'betrag', 'quelle', 'notiz'],
+  Vorlagen:  ['id', 'name', 'betrag', 'kategorie', 'tag', 'aktiv', 'zuletzt'],
   Config:    ['key', 'value']
 };
 
-var TEXT_COLUMNS = ['id', 'erstellt', 'datum', 'reueAm', 'zuletzt'];
+var TEXT_SPALTEN = ['id', 'erstellt', 'datum', 'reueAm', 'zuletzt'];
 
 // ---------------------------------------------------------------- Einstieg
 
@@ -41,11 +43,11 @@ function doPost(e) {
     return json_({ ok: false, error: 'Ungueltiges JSON im Request-Body.' });
   }
 
-  var expected = PropertiesService.getScriptProperties().getProperty(TOKEN_PROP);
-  if (!expected) {
+  var erwartet = PropertiesService.getScriptProperties().getProperty(TOKEN_PROP);
+  if (!erwartet) {
     return json_({ ok: false, error: 'Kein Token hinterlegt. Scripteigenschaft ' + TOKEN_PROP + ' anlegen.' });
   }
-  if (String(req.token || '') !== String(expected)) {
+  if (String(req.token || '') !== String(erwartet)) {
     return json_({ ok: false, error: 'Token stimmt nicht.' });
   }
 
@@ -71,7 +73,6 @@ function dispatch_(req) {
       return { ok: true, pong: true, tabelle: SpreadsheetApp.getActiveSpreadsheet().getName() };
 
     case 'sync':
-      // Ein Roundtrip: ausstehende Aenderungen anwenden, danach alles zurueckgeben.
       var angewendet = [];
       var ops = req.ops || [];
       for (var i = 0; i < ops.length; i++) {
@@ -89,9 +90,9 @@ function dispatch_(req) {
 
 function applyOp_(op) {
   switch (op.typ) {
-    case 'upsert':      return upsert_(op.blatt, op.datensatz);
-    case 'delete':      return remove_(op.blatt, op.id);
-    case 'setConfig':   return setConfig_(op.key, op.value);
+    case 'upsert':    return upsert_(op.blatt, op.datensatz);
+    case 'delete':    return remove_(op.blatt, op.id);
+    case 'setConfig': return setConfig_(op.key, op.value);
     default: throw new Error('Unbekannter Operationstyp: ' + op.typ);
   }
 }
@@ -100,14 +101,13 @@ function upsert_(blattName, datensatz) {
   var spalten = SCHEMA[blattName];
   if (!spalten) throw new Error('Unbekanntes Blatt: ' + blattName);
   var blatt = sheet_(blattName);
-  var zeile = spalten.map(function (s) { return datensatz[s] === undefined || datensatz[s] === null ? '' : datensatz[s]; });
+  var zeile = spalten.map(function (s) {
+    return datensatz[s] === undefined || datensatz[s] === null ? '' : datensatz[s];
+  });
 
   var index = findRow_(blatt, String(datensatz.id));
-  if (index > 0) {
-    blatt.getRange(index, 1, 1, spalten.length).setValues([zeile]);
-  } else {
-    blatt.appendRow(zeile);
-  }
+  if (index > 0) blatt.getRange(index, 1, 1, spalten.length).setValues([zeile]);
+  else blatt.appendRow(zeile);
 }
 
 function remove_(blattName, id) {
@@ -119,11 +119,8 @@ function remove_(blattName, id) {
 function setConfig_(key, value) {
   var blatt = sheet_('Config');
   var index = findRow_(blatt, String(key));
-  if (index > 0) {
-    blatt.getRange(index, 2).setValue(value);
-  } else {
-    blatt.appendRow([key, value]);
-  }
+  if (index > 0) blatt.getRange(index, 2).setValue(value);
+  else blatt.appendRow([key, value]);
 }
 
 // ------------------------------------------------------------------- Lesen
@@ -146,7 +143,7 @@ function readSheet_(blattName) {
   var werte = blatt.getRange(2, 1, anzahl, spalten.length).getValues();
   var out = [];
   for (var i = 0; i < werte.length; i++) {
-    if (String(werte[i][0] || '') === '') continue;   // Leerzeile
+    if (String(werte[i][0] || '') === '') continue;
     var obj = {};
     for (var j = 0; j < spalten.length; j++) {
       obj[spalten[j]] = normalise_(spalten[j], werte[i][j]);
@@ -169,13 +166,12 @@ function readConfig_() {
   return cfg;
 }
 
-/**
- * Sheets wandelt "2026-10-27" gern in ein Date-Objekt um. Wir geben
- * Datums- und ID-Felder immer als String zurueck, Betraege immer als Zahl.
- */
+/** Sheets macht aus "2026-11-01" gern ein Date-Objekt. Datums- und ID-Felder
+ *  kommen deshalb immer als String zurueck, Betraege immer als Zahl. */
 function normalise_(spalte, wert) {
   if (wert instanceof Date) {
-    return Utilities.formatDate(wert, SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(), 'yyyy-MM-dd');
+    return Utilities.formatDate(wert,
+      SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(), 'yyyy-MM-dd');
   }
   if (spalte === 'betrag') return Number(wert) || 0;
   if (spalte === 'notwendigkeit' || spalte === 'tag') return wert === '' ? '' : Number(wert);
@@ -190,9 +186,13 @@ function sheet_(name) {
   if (!blatt) {
     blatt = ss.insertSheet(name);
     initSheet_(blatt, name);
-  } else if (blatt.getLastRow() === 0) {
-    initSheet_(blatt, name);
+    return blatt;
   }
+  if (blatt.getLastRow() === 0) {
+    initSheet_(blatt, name);
+    return blatt;
+  }
+  spaltenErgaenzen_(blatt, name);
   return blatt;
 }
 
@@ -200,15 +200,32 @@ function initSheet_(blatt, name) {
   var spalten = SCHEMA[name];
   blatt.getRange(1, 1, 1, spalten.length).setValues([spalten]).setFontWeight('bold');
   blatt.setFrozenRows(1);
-  // Text-Spalten als Klartext formatieren, damit Sheets nichts umdeutet.
-  for (var i = 0; i < spalten.length; i++) {
-    if (TEXT_COLUMNS.indexOf(spalten[i]) >= 0) {
-      blatt.getRange(2, i + 1, blatt.getMaxRows() - 1, 1).setNumberFormat('@');
-    }
+  for (var i = 0; i < spalten.length; i++) formatSpalte_(blatt, name, spalten[i], i + 1);
+}
+
+/** Haengt Spalten an, die im Blatt noch fehlen. Damit ist ein Schema-Update
+ *  rueckwaertskompatibel und braucht kein Eingreifen in der Tabelle. */
+function spaltenErgaenzen_(blatt, name) {
+  var soll = SCHEMA[name];
+  var breite = Math.max(blatt.getLastColumn(), 1);
+  var ist = blatt.getRange(1, 1, 1, breite).getValues()[0].map(function (v) { return String(v || ''); });
+
+  for (var i = 0; i < soll.length; i++) {
+    if (ist.indexOf(soll[i]) >= 0) continue;
+    var neueSpalte = blatt.getLastColumn() + 1;
+    blatt.getRange(1, neueSpalte).setValue(soll[i]).setFontWeight('bold');
+    formatSpalte_(blatt, name, soll[i], neueSpalte);
+    ist.push(soll[i]);
   }
-  if (name === 'Ausgaben' || name === 'Einnahmen' || name === 'Vorlagen') {
-    var betragSpalte = spalten.indexOf('betrag') + 1;
-    blatt.getRange(2, betragSpalte, blatt.getMaxRows() - 1, 1).setNumberFormat('#,##0.00 "EUR"');
+}
+
+function formatSpalte_(blatt, name, spalte, index) {
+  var zeilen = blatt.getMaxRows() - 1;
+  if (zeilen < 1) return;
+  if (TEXT_SPALTEN.indexOf(spalte) >= 0) {
+    blatt.getRange(2, index, zeilen, 1).setNumberFormat('@');
+  } else if (spalte === 'betrag') {
+    blatt.getRange(2, index, zeilen, 1).setNumberFormat('#,##0.00 "EUR"');
   }
 }
 

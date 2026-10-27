@@ -28,6 +28,7 @@
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" class="tab" data-view="erfassen">Erfassen</button>
   <button type="button" role="tab" class="tab" data-view="uebersicht">&Uuml;bersicht</button>
+  <button type="button" role="tab" class="tab" data-view="vergleich">Vergleich</button>
   <button type="button" role="tab" class="tab" data-view="reue">Reue<span class="badge" id="reue-badge" hidden>0</span></button>
   <button type="button" role="tab" class="tab" data-view="liste">Liste</button>
   <button type="button" role="tab" class="tab" data-view="setup">Setup</button>
@@ -37,6 +38,9 @@
 
   <!-- ====================================================== ERFASSEN -->
   <section class="view" data-view="erfassen">
+    <div id="monatsabschluss"></div>
+    <div id="autobuchung"></div>
+
     <div class="seg-switch" id="richtung">
       <button type="button" class="aktiv" data-richtung="ausgabe">Ausgabe</button>
       <button type="button" data-richtung="einnahme">Einnahme</button>
@@ -55,30 +59,28 @@
 
       <div class="feld">
         <div class="feld-kopf">
+          <span class="feld-label">Stichwort</span>
+          <span class="feld-hint">optional, wird zusammengefasst</span>
+        </div>
+        <div class="chips" id="stichwort-chips"></div>
+        <input type="text" id="stichwort" class="eingabe" list="stichwort-liste"
+               placeholder="z.B. Zigaretten, Lieferando, Feierabendbier" maxlength="40">
+        <datalist id="stichwort-liste"></datalist>
+      </div>
+
+      <div class="feld">
+        <div class="feld-kopf">
           <span class="feld-label">Wie n&ouml;tig war das?</span>
           <span class="feld-hint" id="notwendigkeit-hint"></span>
         </div>
         <div class="skala" id="notwendigkeit-skala"></div>
       </div>
 
-      <div class="feld">
-        <div class="feld-kopf"><span class="feld-label">F&uuml;r wen?</span></div>
-        <div class="seg-switch seg-wide" id="fuer-wen">
-          <button type="button" class="aktiv" data-wen="ich">Nur ich</button>
-          <button type="button" data-wen="geteilt">Geteilt</button>
-          <button type="button" data-wen="andere">F&uuml;r andere</button>
-        </div>
-        <input type="text" id="person" class="eingabe person-feld" list="personen-liste" placeholder="Wer? (z.B. Max, Team, Familie)" hidden>
-        <datalist id="personen-liste"></datalist>
-      </div>
-
       <details class="mehr">
-        <summary>Datum &amp; Notiz</summary>
+        <summary>Anderes Datum</summary>
         <div class="mehr-inhalt">
           <label class="feld-label" for="datum">Datum</label>
           <input type="date" id="datum" class="eingabe">
-          <label class="feld-label" for="notiz">Notiz</label>
-          <input type="text" id="notiz" class="eingabe" placeholder="optional">
         </div>
       </details>
 
@@ -91,17 +93,8 @@
         <input type="text" id="e-betrag" inputmode="decimal" placeholder="0,00" aria-label="Betrag in Euro" required>
       </label>
       <div class="feld">
-        <div class="feld-kopf"><span class="feld-label">Art</span></div>
-        <div class="seg-switch seg-wide" id="einnahme-typ">
-          <button type="button" class="aktiv" data-typ="einkommen">Einkommen</button>
-          <button type="button" data-typ="erstattung">R&uuml;ckzahlung an mich</button>
-        </div>
-      </div>
-      <div class="feld">
         <label class="feld-label" for="e-quelle">Quelle</label>
-        <input type="text" id="e-quelle" class="eingabe" placeholder="Gehalt, Nebenjob, ...">
-        <label class="feld-label" for="e-person" id="e-person-label" hidden>Von wem?</label>
-        <input type="text" id="e-person" class="eingabe" list="personen-liste" placeholder="Wer hat zur&uuml;ckgezahlt?" hidden>
+        <input type="text" id="e-quelle" class="eingabe" placeholder="Gehalt, Nebenjob, Verkauf, ...">
         <label class="feld-label" for="e-datum">Datum</label>
         <input type="date" id="e-datum" class="eingabe">
       </div>
@@ -118,6 +111,11 @@
     <div id="charts"></div>
   </section>
 
+  <!-- ====================================================== VERGLEICH -->
+  <section class="view" data-view="vergleich" hidden>
+    <div id="vergleich-inhalt"></div>
+  </section>
+
   <!-- ========================================================== REUE -->
   <section class="view" data-view="reue" hidden>
     <div id="reue-inhalt"></div>
@@ -126,11 +124,10 @@
   <!-- ========================================================= LISTE -->
   <section class="view" data-view="liste" hidden>
     <div class="filterzeile">
-      <input type="search" id="liste-suche" class="eingabe" placeholder="Suchen (Kategorie, Notiz, Person)">
+      <input type="search" id="liste-suche" class="eingabe" placeholder="Suchen (Kategorie, Stichwort)">
       <select id="liste-filter" class="eingabe">
         <option value="alle">Alle Stufen</option>
         <option value="unnoetig">Nur Impuls + Reue</option>
-        <option value="andere">Nur f&uuml;r andere</option>
         <option value="einnahmen">Nur Einnahmen</option>
       </select>
     </div>
@@ -154,8 +151,17 @@
     </div>
 
     <div class="card">
+      <h2>Monatliches Einkommen</h2>
+      <p class="hilfe">Wird zu Beginn jedes Monats automatisch gebucht. Abweichungen kannst du im Tab Erfassen nachtragen.</p>
+      <div class="vorlage-form">
+        <input type="text" id="cfg-einkommen" class="eingabe" inputmode="decimal" placeholder="z.B. 2400">
+        <button type="button" class="btn-ghost" id="cfg-einkommen-speichern">Speichern</button>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Monatliche Fixkosten</h2>
-      <p class="hilfe">Miete, Versicherungen, Abos. Einmal anlegen, dann pro Monat mit einem Klick buchen &ndash; automatisch als Stufe&nbsp;0 (Fix).</p>
+      <p class="hilfe">Miete, Versicherungen, Abos. Werden zu Beginn jedes Monats automatisch als Stufe&nbsp;0 gebucht.</p>
       <div id="vorlagen-liste"></div>
       <form id="form-vorlage" class="vorlage-form" autocomplete="off">
         <input type="text" id="v-name" class="eingabe" placeholder="Bezeichnung" required>
@@ -163,7 +169,7 @@
         <select id="v-kategorie" class="eingabe"></select>
         <button type="submit" class="btn-ghost">Hinzuf&uuml;gen</button>
       </form>
-      <button type="button" class="btn-primary" id="vorlagen-buchen">Fixkosten f&uuml;r diesen Monat buchen</button>
+      <button type="button" class="btn-ghost" id="vorlagen-buchen">Jetzt f&uuml;r diesen Monat buchen</button>
     </div>
 
     <div class="card">
@@ -181,12 +187,25 @@
         <button type="button" class="btn-ghost" id="export-json">Export (JSON)</button>
         <button type="button" class="btn-ghost" id="export-csv">Export (CSV)</button>
         <button type="button" class="btn-ghost" id="neu-laden">Neu laden</button>
+        <button type="button" class="btn-ghost" id="onboarding-neu">Einrichtung erneut</button>
       </div>
       <p class="hilfe" id="daten-info"></p>
     </div>
   </section>
 
 </main>
+
+<!-- ===================================================== ONBOARDING -->
+<div class="overlay" id="onboarding" hidden>
+  <div class="overlay-box">
+    <div class="ob-fortschritt" id="ob-fortschritt"></div>
+    <div class="ob-inhalt" id="ob-inhalt"></div>
+    <div class="ob-fuss">
+      <button type="button" class="btn-ghost" id="ob-zurueck">Zur&uuml;ck</button>
+      <button type="button" class="btn-primary" id="ob-weiter">Weiter</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="tooltip" id="tooltip" role="tooltip" hidden></div>

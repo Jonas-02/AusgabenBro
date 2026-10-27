@@ -12,12 +12,6 @@ export const STUFEN = [
 
 export const UNNOETIG_AB = 3;
 
-export const WEN = {
-  ich:     { label: 'Nur ich',    kurz: 'ich' },
-  geteilt: { label: 'Geteilt',    kurz: 'geteilt' },
-  andere:  { label: 'Für andere', kurz: 'für andere' }
-};
-
 export const URTEILE = [
   { wert: 'gut',     icon: '\u{1F44D}', label: 'War es wert', token: '--gut' },
   { wert: 'neutral', icon: '\u{1F610}', label: 'Geht so',     token: '--n2' },
@@ -58,6 +52,12 @@ const EUR0 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR'
 
 export function eur(cent)      { return EUR.format(zuEuro(cent)); }
 export function eurKurz(cent)  { return EUR0.format(zuEuro(cent)); }
+/** Vorzeichenbehaftet, fuer Vergleiche: "+142 EUR" / "-142 EUR". */
+export function eurDelta(cent) {
+  if (!cent) return '\u00b10 \u20ac';
+  return (cent > 0 ? '+' : '\u2212') + EUR0.format(Math.abs(zuEuro(cent)));
+}
+
 export function prozent(teil, ganz, stellen = 0) {
   if (!ganz) return '0 %';
   return (teil / ganz * 100).toFixed(stellen).replace('.', ',') + ' %';
@@ -110,6 +110,12 @@ export function datumLesbar(datum) {
 }
 
 /* -------------------------------------------------------------- Sonstige */
+
+/** Schluessel fuer die Gruppierung von Stichwoertern: Gross-/Kleinschreibung
+ *  und Mehrfach-Leerzeichen sollen nicht zu getrennten Gruppen fuehren. */
+export function normStichwort(text) {
+  return String(text || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
 
 export function id() {
   if (globalThis.crypto && crypto.randomUUID) return crypto.randomUUID();
