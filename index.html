@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AusgabenBro</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#128176;</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">AusgabenBro</span>
+  </div>
+  <div class="month-nav">
+    <button type="button" class="icon-btn" id="monat-zurueck" aria-label="Vorheriger Monat">&#8249;</button>
+    <span id="monat-label">&nbsp;</span>
+    <button type="button" class="icon-btn" id="monat-vor" aria-label="N&auml;chster Monat">&#8250;</button>
+  </div>
+  <div class="topbar-right">
+    <button type="button" class="sync-dot" id="sync-dot" title="Synchronisierung" aria-live="polite"></button>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Hell/Dunkel umschalten"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.8a6.2 6.2 0 0 0 0 12.4z" fill="currentColor"/></svg></button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button type="button" role="tab" class="tab" data-view="erfassen">Erfassen</button>
+  <button type="button" role="tab" class="tab" data-view="uebersicht">&Uuml;bersicht</button>
+  <button type="button" role="tab" class="tab" data-view="reue">Reue<span class="badge" id="reue-badge" hidden>0</span></button>
+  <button type="button" role="tab" class="tab" data-view="liste">Liste</button>
+  <button type="button" role="tab" class="tab" data-view="setup">Setup</button>
+</nav>
+
+<main id="main">
+
+  <!-- ====================================================== ERFASSEN -->
+  <section class="view" data-view="erfassen">
+    <div class="seg-switch" id="richtung">
+      <button type="button" class="aktiv" data-richtung="ausgabe">Ausgabe</button>
+      <button type="button" data-richtung="einnahme">Einnahme</button>
+    </div>
+
+    <form id="form-ausgabe" class="card" autocomplete="off">
+      <label class="betrag-feld">
+        <span class="betrag-waehrung">&euro;</span>
+        <input type="text" id="betrag" inputmode="decimal" placeholder="0,00" aria-label="Betrag in Euro" required>
+      </label>
+
+      <div class="feld">
+        <div class="feld-kopf"><span class="feld-label">Kategorie</span></div>
+        <div class="chips" id="kategorie-chips"></div>
+      </div>
+
+      <div class="feld">
+        <div class="feld-kopf">
+          <span class="feld-label">Wie n&ouml;tig war das?</span>
+          <span class="feld-hint" id="notwendigkeit-hint"></span>
+        </div>
+        <div class="skala" id="notwendigkeit-skala"></div>
+      </div>
+
+      <div class="feld">
+        <div class="feld-kopf"><span class="feld-label">F&uuml;r wen?</span></div>
+        <div class="seg-switch seg-wide" id="fuer-wen">
+          <button type="button" class="aktiv" data-wen="ich">Nur ich</button>
+          <button type="button" data-wen="geteilt">Geteilt</button>
+          <button type="button" data-wen="andere">F&uuml;r andere</button>
+        </div>
+        <input type="text" id="person" class="eingabe person-feld" list="personen-liste" placeholder="Wer? (z.B. Max, Team, Familie)" hidden>
+        <datalist id="personen-liste"></datalist>
+      </div>
+
+      <details class="mehr">
+        <summary>Datum &amp; Notiz</summary>
+        <div class="mehr-inhalt">
+          <label class="feld-label" for="datum">Datum</label>
+          <input type="date" id="datum" class="eingabe">
+          <label class="feld-label" for="notiz">Notiz</label>
+          <input type="text" id="notiz" class="eingabe" placeholder="optional">
+        </div>
+      </details>
+
+      <button type="submit" class="btn-primary">Ausgabe speichern</button>
+    </form>
+
+    <form id="form-einnahme" class="card" autocomplete="off" hidden>
+      <label class="betrag-feld">
+        <span class="betrag-waehrung">&euro;</span>
+        <input type="text" id="e-betrag" inputmode="decimal" placeholder="0,00" aria-label="Betrag in Euro" required>
+      </label>
+      <div class="feld">
+        <div class="feld-kopf"><span class="feld-label">Art</span></div>
+        <div class="seg-switch seg-wide" id="einnahme-typ">
+          <button type="button" class="aktiv" data-typ="einkommen">Einkommen</button>
+          <button type="button" data-typ="erstattung">R&uuml;ckzahlung an mich</button>
+        </div>
+      </div>
+      <div class="feld">
+        <label class="feld-label" for="e-quelle">Quelle</label>
+        <input type="text" id="e-quelle" class="eingabe" placeholder="Gehalt, Nebenjob, ...">
+        <label class="feld-label" for="e-person" id="e-person-label" hidden>Von wem?</label>
+        <input type="text" id="e-person" class="eingabe" list="personen-liste" placeholder="Wer hat zur&uuml;ckgezahlt?" hidden>
+        <label class="feld-label" for="e-datum">Datum</label>
+        <input type="date" id="e-datum" class="eingabe">
+      </div>
+      <button type="submit" class="btn-primary">Einnahme speichern</button>
+    </form>
+
+    <div class="heute-leiste" id="heute-leiste"></div>
+    <div id="zuletzt"></div>
+  </section>
+
+  <!-- ===================================================== UEBERSICHT -->
+  <section class="view" data-view="uebersicht" hidden>
+    <div class="kpi-grid" id="kpis"></div>
+    <div id="charts"></div>
+  </section>
+
+  <!-- ========================================================== REUE -->
+  <section class="view" data-view="reue" hidden>
+    <div id="reue-inhalt"></div>
+  </section>
+
+  <!-- ========================================================= LISTE -->
+  <section class="view" data-view="liste" hidden>
+    <div class="filterzeile">
+      <input type="search" id="liste-suche" class="eingabe" placeholder="Suchen (Kategorie, Notiz, Person)">
+      <select id="liste-filter" class="eingabe">
+        <option value="alle">Alle Stufen</option>
+        <option value="unnoetig">Nur Impuls + Reue</option>
+        <option value="andere">Nur f&uuml;r andere</option>
+        <option value="einnahmen">Nur Einnahmen</option>
+      </select>
+    </div>
+    <div id="liste-inhalt"></div>
+  </section>
+
+  <!-- ========================================================= SETUP -->
+  <section class="view" data-view="setup" hidden>
+    <div class="card">
+      <h2>Verbindung zur Google-Tabelle</h2>
+      <p class="hilfe">Beide Werte bekommst du beim Bereitstellen des Apps&#8209;Scripts. Sie werden <strong>nur lokal</strong> in diesem Browser gespeichert und stehen nicht im Quelltext der Seite.</p>
+      <label class="feld-label" for="cfg-url">Web-App-URL (endet auf /exec)</label>
+      <input type="url" id="cfg-url" class="eingabe" placeholder="https://script.google.com/macros/s/.../exec">
+      <label class="feld-label" for="cfg-token">Token</label>
+      <input type="password" id="cfg-token" class="eingabe" placeholder="dein Token">
+      <div class="btn-reihe">
+        <button type="button" class="btn-primary" id="cfg-speichern">Verbinden &amp; testen</button>
+        <button type="button" class="btn-ghost" id="cfg-link">Embed-Link erzeugen</button>
+      </div>
+      <div id="cfg-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Monatliche Fixkosten</h2>
+      <p class="hilfe">Miete, Versicherungen, Abos. Einmal anlegen, dann pro Monat mit einem Klick buchen &ndash; automatisch als Stufe&nbsp;0 (Fix).</p>
+      <div id="vorlagen-liste"></div>
+      <form id="form-vorlage" class="vorlage-form" autocomplete="off">
+        <input type="text" id="v-name" class="eingabe" placeholder="Bezeichnung" required>
+        <input type="text" id="v-betrag" class="eingabe" inputmode="decimal" placeholder="Betrag" required>
+        <select id="v-kategorie" class="eingabe"></select>
+        <button type="submit" class="btn-ghost">Hinzuf&uuml;gen</button>
+      </form>
+      <button type="button" class="btn-primary" id="vorlagen-buchen">Fixkosten f&uuml;r diesen Monat buchen</button>
+    </div>
+
+    <div class="card">
+      <h2>Kategorien</h2>
+      <div class="chips" id="kategorie-verwaltung"></div>
+      <form id="form-kategorie" class="vorlage-form" autocomplete="off">
+        <input type="text" id="k-name" class="eingabe" placeholder="Neue Kategorie" required>
+        <button type="submit" class="btn-ghost">Hinzuf&uuml;gen</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Daten</h2>
+      <div class="btn-reihe">
+        <button type="button" class="btn-ghost" id="export-json">Export (JSON)</button>
+        <button type="button" class="btn-ghost" id="export-csv">Export (CSV)</button>
+        <button type="button" class="btn-ghost" id="neu-laden">Neu laden</button>
+      </div>
+      <p class="hilfe" id="daten-info"></p>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>
