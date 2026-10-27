@@ -177,14 +177,48 @@ apps-script/Code.gs     Backend für Google Sheets
 
 ### Design
 
-Farben, Abstände und Radien liegen ausschließlich als CSS-Custom-Properties im
-`:root`-Block von `assets/style.css`, je einmal für hell und dunkel. Ein eigenes
-Designsystem ersetzt diesen Block; der Rest des Stylesheets referenziert nur
+Die Oberfläche folgt dem Figma-Kit **Maglo – Financial Management Web UI Kit
+(Community)**. Die Werte stammen aus den Figma-Variablen der Datei, nicht aus
+dem Augenmaß.
+
+| Rolle | Hell | Dunkel | Quelle im Kit |
+|---|---|---|---|
+| Seitenfläche | `#FAFAFA` | `#1C1A2E` | Gray 1 / Dark BG |
+| Karte | `#FFFFFF` | `#201E34` | Pure White / Dark 1 |
+| Feld, Chip, Pille | `#F8F8F8` | `#282541` | Gray 2 / Dark 2 |
+| Text primär | `#1B212D` | `#FFFFFF` | Text 1 |
+| Text sekundär | `#78778B` | `#929EAE` | Text 3 / Text 2 |
+| Akzent | `#C8EE44` | `#C8EE44` | Primary Color |
+| Positiv | `#29A073` | `#34C08F` | Secondary Color |
+| Radius Karte / Pille | 10 px / 6 px | — | Kit |
+| Schrift | Kumbh Sans 400/500/600/700 | — | Kit |
+
+Alles liegt als CSS-Custom-Property im `:root`-Block von `assets/style.css`,
+je einmal für hell und dunkel. Der Rest des Stylesheets referenziert nur
 Rollen, keine Hex-Werte.
 
-Die Notwendigkeits-Skala ist eine divergierende Skala (nötig ← neutral →
-unnötig) und wurde gegen Farbfehlsichtigkeit geprüft: benachbarte Stufen
-trennen hell mit ΔE 10,0 (CVD) bzw. 15,7 (Normalsicht), dunkel mit 10,7 bzw.
-17,3. Zahlen stehen grundsätzlich neben den Flächen, nie darin, und jedes
-Diagramm hat eine Legende mit Werten sowie eine aufklappbare Tabelle — Farbe
-trägt nirgends allein die Information.
+#### Bewusste Abweichungen
+
+Sieben Stellen weichen vom Kit ab. Jede hat einen Grund:
+
+1. **Limette trägt keine Daten.** `#C8EE44` hat auf Weiß 1,33:1 Kontrast. Im
+   Kit ist das die Füllung der „Expenses"-Linie im Chart — als bedeutungs-
+   tragende Fläche ist das nicht lesbar. Limette wird hier nur für Button,
+   aktiven Tab und Markenpunkt benutzt, immer mit dunkler Schrift darauf.
+2. **Aktiver Tab als gefüllte Pille**, nicht als Unterstrich. Ein 2 px breiter
+   Limettenstrich wäre auf Weiß praktisch unsichtbar. Die Pille ist ohnehin
+   die Lösung, die das Kit in seinem Sidebar verwendet.
+3. **Fokusring** ist in hell `#1B212D` statt Limette, aus demselben Grund.
+4. **Die fünfstufige Notwendigkeits-Skala gibt es im Kit nicht.** Sie wurde aus
+   Secondary Color und Dark 2 abgeleitet und mit `validate_palette.js` geprüft:
+   benachbarte Stufen trennen hell mit ΔE 12,1 (Farbfehlsichtigkeit) und 16,8
+   (Normalsicht), dunkel mit 8,8 und 16,5 — Schwellen sind 8 bzw. 15.
+   „Geplant" und „Impuls" liegen unter 3:1 Kontrast; deshalb steht an jeder
+   Fläche eine sichtbare Beschriftung und jede Karte hat eine Tabellenansicht.
+   Farbe trägt nirgends allein die Information.
+5. **Warn- und Fehlerfarbe** (`#E8923B`, `#CE2F2F`) sind abgeleitet; das Kit
+   hinterlegt dafür keine Variablen.
+6. **Grundschriftgröße 15 px** statt der 14 px aus dem Kit. Maglo ist ein
+   Desktop-Dashboard, diese App läuft primär auf dem Telefon.
+7. **Zeilenhöhe 1,45** im Fließtext statt der im Kit hinterlegten 100 %.
+   Deutsche Komposita brechen sonst unleserlich um.

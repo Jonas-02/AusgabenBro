@@ -1,92 +1,108 @@
-/* ===================================================== Farb- und Formtoken
-   Divergierende Notwendigkeits-Skala (noetig <- neutral -> unnoetig),
-   mit scripts/validate_palette.js geprueft:
-   hell  CVD dE 10.0 / Normalsicht 15.7
-   dunkel CVD dE 10.7 / Normalsicht 17.3
-   Die beiden kontrastschwachen Stufen tragen immer sichtbare Beschriftung. */
+/* ============================================= Design-Token: Maglo UI Kit
+   Quelle: Figma "Maglo - Financial Management Web UI Kit (Community)",
+   Datei Y3ibu0JhElA4aTyd44pBK7, ausgelesen ueber die Figma-Variablen.
+
+   Uebernommen: Primary #C8EE44, Secondary #29A073, Text 1/2/3, Gray 1/2/3,
+   Dark BG/Dark 1/Dark 2, Radien 10px/5px, Schrift Kumbh Sans.
+
+   Abgeleitet (im Kit nicht vorhanden): Rahmen-Kontrastfarbe, Achsenlinie,
+   Warn- und Fehlerfarbe sowie die fuenfstufige Notwendigkeits-Skala. Letztere
+   wurde mit scripts/validate_palette.js geprueft, siehe Kommentar dort. */
 
 :root {
   color-scheme: light;
 
-  --plane:        #f9f9f7;
-  --surface:      #fcfcfb;
-  --surface-2:    #f2f1ec;
-  --text:         #0b0b0b;
-  --text-2:       #52514e;
-  --muted:        #898781;
-  --grid:         #e1e0d9;
-  --axis:         #c3c2b7;
-  --border:       rgba(11, 11, 11, 0.10);
-  --border-stark: rgba(11, 11, 11, 0.22);
+  --plane:        #fafafa;   /* Gray 1        */
+  --surface:      #ffffff;   /* Pure White    */
+  --surface-2:    #f8f8f8;   /* Gray 2        */
+  --text:         #1b212d;   /* Text 1        */
+  --text-2:       #78778b;   /* Text 3        */
+  --muted:        #929eae;   /* Text 2        */
+  --grid:         #f5f5f5;   /* Gray 3        */
+  --axis:         #e6e6eb;   /* abgeleitet    */
+  --border:       #f0f0f3;   /* abgeleitet    */
+  --border-stark: #dcdce3;   /* abgeleitet    */
 
-  --akzent:       #2a78d6;
-  --akzent-ink:   #ffffff;
+  --akzent:       #c8ee44;   /* Primary Color */
+  --akzent-ink:   #1b212d;   /* Primary traegt dunkle Schrift, wie im Kit */
+  --fokus:        #1b212d;
 
-  --n0: #184f95;   /* Fix      */
-  --n1: #5598e7;   /* Noetig   */
-  --n2: #7d7c75;   /* Geplant  */
-  --n3: #ec835a;   /* Impuls   */
-  --n4: #d03b3b;   /* Reue     */
+  /* Notwendigkeits-Skala: divergierend, noetig <- neutral -> unnoetig.
+     Geprueft gegen Farbfehlsichtigkeit auf #ffffff:
+     benachbarte Stufen CVD dE 12.1, Normalsicht dE 16.8 (Schwellen 8 / 15).
+     Stufe 2 und 3 liegen unter 3:1 Kontrast - deshalb steht an jeder Flaeche
+     eine sichtbare Beschriftung und jede Karte hat eine Tabellenansicht. */
+  --n0: #282541;   /* Fix      - Dark 2, strukturell, nicht verhandelbar */
+  --n1: #29a073;   /* Noetig   - Secondary Color                        */
+  --n2: #a7b0c0;   /* Geplant  - neutraler Mittelpunkt                  */
+  --n3: #e8923b;   /* Impuls                                            */
+  --n4: #ce2f2f;   /* Reue                                              */
 
-  --noetig:   #2a78d6;
-  --unnoetig: #d03b3b;
+  --noetig:   #29a073;
+  --unnoetig: #ce2f2f;
 
-  --gut:      #0ca30c;
-  --warnung:  #fab219;
-  --kritisch: #d03b3b;
-  --gut-text: #006300;
+  --gut:      #29a073;   /* Secondary Color */
+  --warnung:  #e8923b;
+  --kritisch: #ce2f2f;
+  --gut-text: #1f8560;   /* dunkler fuer Text auf heller Flaeche */
 
-  --radius:   10px;
-  --radius-s: 6px;
-  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius:   10px;      /* Kartenradius im Kit */
+  --radius-s: 6px;       /* Pillen und Felder   */
+  --font: "Kumbh Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --plane:        #0d0d0d;
-    --surface:      #1a1a19;
-    --surface-2:    #232322;
-    --text:         #f0efec;
-    --text-2:       #c3c2b7;
-    --muted:        #898781;
-    --grid:         #2c2c2a;
-    --axis:         #383835;
-    --border:       rgba(255, 255, 255, 0.10);
-    --border-stark: rgba(255, 255, 255, 0.24);
-    --akzent:       #3987e5;
-    --n0: #9ec5f4;
-    --n1: #3987e5;
-    --n2: #8a8980;
-    --n3: #f0996e;
-    --n4: #d03b3b;
-    --noetig:   #3987e5;
-    --unnoetig: #d03b3b;
-    --gut-text: #0ca30c;
+    --plane:        #1c1a2e;   /* Dark BG */
+    --surface:      #201e34;   /* Dark 1  */
+    --surface-2:    #282541;   /* Dark 2  */
+    --text:         #ffffff;
+    --text-2:       #929eae;   /* Text 2  */
+    --muted:        #78778b;   /* Text 3  */
+    --grid:         #282541;
+    --axis:         #37335a;
+    --border:       #2b2846;
+    --border-stark: #3a3660;
+    --fokus:        #c8ee44;
+    --n0: #b6becf;
+    --n1: #34c08f;
+    --n2: #5a5b7a;
+    --n3: #f0a04b;
+    --n4: #e5555a;
+    --noetig:   #34c08f;
+    --unnoetig: #e5555a;
+    --gut:      #34c08f;
+    --warnung:  #f0a04b;
+    --kritisch: #e5555a;
+    --gut-text: #34c08f;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --plane:        #0d0d0d;
-  --surface:      #1a1a19;
-  --surface-2:    #232322;
-  --text:         #f0efec;
-  --text-2:       #c3c2b7;
-  --muted:        #898781;
-  --grid:         #2c2c2a;
-  --axis:         #383835;
-  --border:       rgba(255, 255, 255, 0.10);
-  --border-stark: rgba(255, 255, 255, 0.24);
-  --akzent:       #3987e5;
-  --n0: #9ec5f4;
-  --n1: #3987e5;
-  --n2: #8a8980;
-  --n3: #f0996e;
-  --n4: #d03b3b;
-  --noetig:   #3987e5;
-  --unnoetig: #d03b3b;
-  --gut-text: #0ca30c;
+  --plane:        #1c1a2e;
+  --surface:      #201e34;
+  --surface-2:    #282541;
+  --text:         #ffffff;
+  --text-2:       #929eae;
+  --muted:        #78778b;
+  --grid:         #282541;
+  --axis:         #37335a;
+  --border:       #2b2846;
+  --border-stark: #3a3660;
+  --fokus:        #c8ee44;
+  --n0: #b6becf;
+  --n1: #34c08f;
+  --n2: #5a5b7a;
+  --n3: #f0a04b;
+  --n4: #e5555a;
+  --noetig:   #34c08f;
+  --unnoetig: #e5555a;
+  --gut:      #34c08f;
+  --warnung:  #f0a04b;
+  --kritisch: #e5555a;
+  --gut-text: #34c08f;
 }
 
 /* ============================================================== Grundlage */
@@ -139,8 +155,8 @@ button { font: inherit; cursor: pointer; }
 
 .brand-mark {
   width: 9px; height: 9px; border-radius: 3px;
-  background: var(--unnoetig);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--unnoetig) 18%, transparent);
+  background: var(--akzent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--akzent) 30%, transparent);
   flex: none;
 }
 
@@ -203,7 +219,7 @@ button { font: inherit; cursor: pointer; }
 .tabs {
   display: flex;
   gap: 2px;
-  padding: 6px 12px 0;
+  padding: 7px 12px 8px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
@@ -217,16 +233,21 @@ button { font: inherit; cursor: pointer; }
 .tab {
   background: none;
   border: 0;
-  border-bottom: 2px solid transparent;
-  padding: 7px 8px 8px;
+  border-radius: var(--radius-s);
+  padding: 7px 8px;
   color: var(--text-2);
   font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
   display: flex; align-items: center; gap: 5px;
 }
-.tab:hover { color: var(--text); }
-.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--akzent); font-weight: 600; }
+.tab:hover { color: var(--text); background: var(--surface-2); }
+.tab[aria-selected="true"] {
+  background: var(--akzent);
+  color: var(--akzent-ink);
+  font-weight: 600;
+}
+.tab[aria-selected="true"] .badge { background: var(--akzent-ink); color: var(--akzent); }
 
 .badge {
   background: var(--kritisch);
@@ -288,7 +309,7 @@ main { flex: 1; padding: 12px 16px 28px; max-width: 760px; width: 100%; margin: 
 
 .eingabe {
   width: 100%;
-  background: var(--plane);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
   color: var(--text);
@@ -296,13 +317,13 @@ main { flex: 1; padding: 12px 16px 28px; max-width: 760px; width: 100%; margin: 
   font-size: 0.88rem;
   padding: 8px 10px;
 }
-.eingabe:focus { outline: 2px solid var(--akzent); outline-offset: -1px; }
+.eingabe:focus { outline: 2px solid var(--fokus); outline-offset: -1px; }
 .person-feld { margin-top: 2px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .chip {
-  background: var(--plane);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 5px 11px;
@@ -322,7 +343,7 @@ main { flex: 1; padding: 12px 16px 28px; max-width: 760px; width: 100%; margin: 
 .skala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
 
 .skala-stufe {
-  background: var(--plane);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
   padding: 7px 2px 6px;
@@ -344,7 +365,7 @@ main { flex: 1; padding: 12px 16px 28px; max-width: 760px; width: 100%; margin: 
 
 .seg-switch {
   display: inline-flex;
-  background: var(--plane);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
   padding: 2px;
@@ -385,11 +406,11 @@ main { flex: 1; padding: 12px 16px 28px; max-width: 760px; width: 100%; margin: 
   font-weight: 600;
   width: 100%;
 }
-.btn-primary:hover { filter: brightness(1.07); }
+.btn-primary:hover { filter: brightness(0.94); }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-ghost {
-  background: var(--plane);
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
@@ -535,7 +556,7 @@ main { flex: 1; padding: 12px 16px 28px; max-width: 760px; width: 100%; margin: 
 .reue-wann { font-size: 0.75rem; color: var(--muted); }
 .reue-knoepfe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .reue-knopf {
-  background: var(--plane);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
   padding: 10px 4px;
@@ -743,6 +764,6 @@ details.tabelle-aufklapp summary:hover { color: var(--text-2); text-decoration: 
 /* Auf schmalen Telefonen sollen alle sechs Tabs ohne Wischen erreichbar sein. */
 @media (max-width: 400px) {
   .tabs { padding-inline: 8px; }
-  .tab { padding: 7px 5px 8px; font-size: 0.75rem; }
+  .tab { padding: 7px 6px; font-size: 0.75rem; }
   main { padding-inline: 12px; }
 }
