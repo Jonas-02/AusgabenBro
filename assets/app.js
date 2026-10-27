@@ -2,7 +2,7 @@
 
 import {
   STUFEN, URTEILE, KATEGORIEN_STANDARD, UNNOETIG_AB,
-  betragParsen, zuEuro, eur, eurKurz, eurDelta, prozent, normStichwort,
+  betragParsen, zuEuro, eur, eurKurz, eurDelta, prozent, normStichwort, istMonat,
   heute, monatVon, monatLabel, monatVerschieben, datumLesbar, tageSeit,
   id, esc, stufe, $, $$
 } from './kern.js';
@@ -11,7 +11,8 @@ import { Store, SPEICHER, lesen, schreiben, configKodieren } from './daten.js';
 
 import {
   monatsAuswertung, verlauf, vergleich, reueRanking, offeneReue,
-  stichwortVorschlaege, alleStichwoerter, erfassteMonate
+  stichwortVorschlaege, alleStichwoerter, erfassteMonate,
+  baselineMonat, datenVorBaseline
 } from './auswertung.js';
 
 import {
@@ -199,9 +200,11 @@ function bannerZeichnen() {
   const dieserMonat = monatVon(heute());
   const vormonat = monatVerschieben(dieserMonat, -1);
   const gesehen = cfgWert('abschlussGesehen', '');
+  const basis = baselineMonat(store.daten);
   const v = monatsAuswertung(store.daten, vormonat);
+  const abschlussZeigen = gesehen !== dieserMonat && !v.leer && (!basis || vormonat >= basis);
 
-  $('#monatsabschluss').innerHTML = (gesehen !== dieserMonat && !v.leer)
+  $('#monatsabschluss').innerHTML = abschlussZeigen
     ? `<div class="banner">
         <div class="banner-text">
           <strong>${esc(monatLabel(vormonat))} ist abgeschlossen.</strong>
@@ -301,8 +304,15 @@ function vergleichZeichnen() {
   }
 
   const v = vergleich(store.daten, ui.monat);
-  ziel.innerHTML =
-      leitmetrikBlock(v)
+  const vorHinweis = v.vorBaseline
+    ? `<div class="hinweis-zeile"><span class="hinweis-icon">\u2139</span><span>
+        ${esc(monatLabel(ui.monat))} liegt vor deinem Startmonat
+        <strong>${esc(monatLabel(v.basis))}</strong>. Es gibt also noch keine Basis zum Vergleichen.
+        Den Startmonat \u00e4nderst du unter Setup.</span></div>`
+    : '';
+
+  ziel.innerHTML = vorHinweis
+    + leitmetrikBlock(v)
     + kennzahlenVergleich(v)
     + deltaListe('Kategorien', v.kategorien, 'In diesem und im Vormonat nichts erfasst.')
     + deltaListe('Stichwörter', v.stichwoerter, 'Noch keine Stichwörter vergeben.')
@@ -401,6 +411,13 @@ function setupZeichnen() {
     const e = einkommenCent();
     if (e) $('#cfg-einkommen').value = String(zuEuro(e)).replace('.', ',');
   }
+  const basis = baselineMonat(store.daten);
+  if (!$('#cfg-baseline').value && basis) $('#cfg-baseline').value = basis;
+
+  const davor = datenVorBaseline(store.daten);
+  $('#baseline-hinweis').innerHTML = davor
+    ? `Aktuell: <strong>${esc(monatLabel(basis))}</strong>. ${davor} Buchung(en) liegen davor \u2013 sie bleiben erhalten, z\u00e4hlen aber nicht zur Basis und erscheinen nicht im Verlauf.`
+    : (basis ? `Aktuell: <strong>${esc(monatLabel(basis))}</strong>.` : '');
 
   const status = $('#cfg-status');
   if (store.status === 'ok') {
@@ -925,6 +942,14 @@ function verdrahten() {
     if (roh && (!Number.isFinite(cent) || cent < 0)) { toast('Betrag prüfen.', true); return; }
     store.configSchreiben('einkommen', roh ? zuEuro(cent) : '');
     toast('Einkommen gespeichert.');
+    zeichnen();
+  });
+
+  $('#cfg-baseline-speichern').addEventListener('click', () => {
+    const wert = $('#cfg-baseline').value.trim();
+    if (wert && !istMonat(wert)) { toast('Bitte einen Monat w\u00e4hlen.', true); return; }
+    store.configSchreiben('baseline', wert);
+    toast(wert ? `Startmonat: ${monatLabel(wert)}.` : 'Startmonat zur\u00fcckgesetzt.');
     zeichnen();
   });
 

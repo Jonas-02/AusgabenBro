@@ -12,6 +12,16 @@ export const STUFEN = [
 
 export const UNNOETIG_AB = 3;
 
+/** Fester Startmonat fuer den Vergleich. Alles davor zaehlt nicht als Basis
+ *  und taucht im Verlauf nicht auf. Ueberschreibbar ueber Setup -> Startmonat
+ *  (Config-Schluessel "baseline" in der Tabelle). */
+export const STANDARD_BASELINE = '2026-11';
+
+/** "2026-11" oder leer. Alles andere wird verworfen. */
+export function istMonat(wert) {
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(wert || ''));
+}
+
 export const URTEILE = [
   { wert: 'gut',     icon: '\u{1F44D}', label: 'War es wert', token: '--gut' },
   { wert: 'neutral', icon: '\u{1F610}', label: 'Geht so',     token: '--n2' },

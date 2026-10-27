@@ -7,7 +7,7 @@
 
 import {
   zuCent, monatVon, monatVerschieben, letzteMonate, tageSeit,
-  normStichwort, UNNOETIG_AB
+  normStichwort, istMonat, UNNOETIG_AB, STANDARD_BASELINE
 } from './kern.js';
 
 const cent = (satz) => zuCent(satz.betrag);
@@ -113,8 +113,19 @@ export function monatsAuswertung(daten, monat) {
 
 /* ----------------------------------------------------------- Monatsvergleich */
 
-/** Baseline = erster Monat, in dem ueberhaupt etwas erfasst wurde. */
+/**
+ * Startmonat des Vergleichs. Vorrang hat der in der Tabelle hinterlegte Wert,
+ * dann der feste Standard. Nur wenn beides fehlt, wird der erste Monat mit
+ * Daten genommen - sonst wuerde ein Probemonat zur Messlatte.
+ */
 export function baselineMonat(daten) {
+  const konfiguriert = daten.config && daten.config.baseline;
+  if (istMonat(konfiguriert)) return String(konfiguriert);
+  if (istMonat(STANDARD_BASELINE)) return STANDARD_BASELINE;
+  return erstesDatenMonat(daten);
+}
+
+function erstesDatenMonat(daten) {
   let fruehester = null;
   for (const a of daten.ausgaben || []) {
     const m = monatVon(a.datum);
@@ -125,6 +136,14 @@ export function baselineMonat(daten) {
     if (m && (!fruehester || m < fruehester)) fruehester = m;
   }
   return fruehester;
+}
+
+/** Gibt es Buchungen vor dem Startmonat? Dann weist die App darauf hin. */
+export function datenVorBaseline(daten) {
+  const basis = baselineMonat(daten);
+  if (!basis) return 0;
+  return (daten.ausgaben || []).filter((a) => monatVon(a.datum) < basis).length
+       + (daten.einnahmen || []).filter((e) => monatVon(e.datum) < basis).length;
 }
 
 export function erfassteMonate(daten) {
@@ -144,7 +163,9 @@ export function vergleich(daten, monat) {
   const basis = baselineMonat(daten);
   const jetzt = monatsAuswertung(daten, monat);
   const vorher = monatsAuswertung(daten, monatVerschieben(monat, -1));
-  const start = basis ? monatsAuswertung(daten, basis) : null;
+  // Vor dem Startmonat gibt es keine Basis, gegen die sich vergleichen liesse.
+  const vorBaseline = Boolean(basis) && monat < basis;
+  const start = (basis && !vorBaseline) ? monatsAuswertung(daten, basis) : null;
 
   const istBaseline = Boolean(basis) && basis === monat;
 
@@ -160,7 +181,7 @@ export function vergleich(daten, monat) {
   ];
 
   return {
-    monat, basis, istBaseline,
+    monat, basis, istBaseline, vorBaseline,
     jetzt, vorher, start,
     kennzahlen,
     kategorien: differenzen(jetzt.kategorien, vorher.kategorien, (k) => k.name),
@@ -192,7 +213,10 @@ function differenzen(jetztListe, vorherListe, schluesselVon, anzeigeVon) {
 }
 
 export function verlauf(daten, bisMonat, anzahl = 6) {
-  return letzteMonate(bisMonat, anzahl).map((m) => {
+  const basis = baselineMonat(daten);
+  return letzteMonate(bisMonat, anzahl)
+    .filter((m) => !basis || m >= basis)
+    .map((m) => {
     const a = ausgabenImMonat(daten, m);
     let gesamt = 0, unnoetig = 0;
     for (const e of a) {

@@ -154,12 +154,18 @@
     </div>
 
     <div class="card">
-      <h2>Monatliches Einkommen</h2>
-      <p class="hilfe">Wird zu Beginn jedes Monats automatisch gebucht. Abweichungen kannst du im Tab Erfassen nachtragen.</p>
+      <h2>Einkommen &amp; Startmonat</h2>
+      <p class="hilfe">Das Einkommen wird zu Beginn jedes Monats automatisch gebucht. Abweichungen tr&auml;gst du im Tab Erfassen nach.</p>
       <div class="vorlage-form">
         <input type="text" id="cfg-einkommen" class="eingabe" inputmode="decimal" placeholder="z.B. 2400">
         <button type="button" class="btn-ghost" id="cfg-einkommen-speichern">Speichern</button>
       </div>
+      <p class="hilfe">Der <strong>Startmonat</strong> ist die Messlatte im Tab Vergleich. Monate davor z&auml;hlen nicht als Basis und tauchen im Verlauf nicht auf.</p>
+      <div class="vorlage-form">
+        <input type="month" id="cfg-baseline" class="eingabe">
+        <button type="button" class="btn-ghost" id="cfg-baseline-speichern">Speichern</button>
+      </div>
+      <p class="hilfe" id="baseline-hinweis"></p>
     </div>
 
     <div class="card">

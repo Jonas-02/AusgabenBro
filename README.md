@@ -43,8 +43,15 @@ Daraus entstehen drei Dinge:
 | **Liste** | Alle Buchungen des Monats, Suche und Filter |
 | **Setup** | Verbindung, Einkommen, Fixkosten, Kategorien, Export |
 
-Alles ist monatsbasiert. Die Baseline für den Vergleich ist automatisch der
-erste Monat, in dem etwas erfasst wurde.
+Alles ist monatsbasiert. Die Messlatte im Vergleich ist der **Startmonat**:
+voreingestellt **November 2026**, änderbar unter Setup → Startmonat. Monate
+davor bleiben erhalten und sind über die Monatsnavigation erreichbar, zählen
+aber nicht als Basis und erscheinen nicht im Verlauf — ein Probemonat soll
+nicht zur Messlatte werden. Ist unter Setup nichts gesetzt und der feste
+Standard entfernt, fällt die App auf den ersten Monat mit Daten zurück.
+
+Der Standardwert steht als `STANDARD_BASELINE` in `assets/kern.js`; der in der
+Tabelle hinterlegte Wert (`Config`-Schlüssel `baseline`) hat immer Vorrang.
 
 ## Was automatisch passiert
 
@@ -132,7 +139,7 @@ Konfiguration im Link, überlebt sie das.
 | `Ausgaben` | id, erstellt, datum, betrag, kategorie, notwendigkeit (0–4), stichwort, reue (gut/neutral/schlecht), reueAm |
 | `Einnahmen` | id, erstellt, datum, betrag, quelle, notiz |
 | `Vorlagen` | id, name, betrag, kategorie, tag, aktiv, zuletzt |
-| `Config` | key, value — `kategorien`, `einkommen`, `onboarding`, `zuletztGebucht`, `abschlussGesehen` |
+| `Config` | key, value — `kategorien`, `einkommen`, `baseline`, `onboarding`, `zuletztGebucht`, `abschlussGesehen` |
 
 Die Tabelle bleibt von Hand lesbar und bearbeitbar. Änderungen dort erscheinen
 beim nächsten Abgleich in der App.
