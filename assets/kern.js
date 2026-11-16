@@ -104,6 +104,16 @@ export function letzteMonate(bis, anzahl) {
   return out;
 }
 
+export function tageInMonat(monat) {
+  const [j, m] = String(monat).split('-').map(Number);
+  return new Date(j, m, 0).getDate();
+}
+
+/** Tag im Monat als Zahl, aus "2026-11-16" also 16. */
+export function tagVon(datum) {
+  return Number(String(datum).slice(8, 10)) || 1;
+}
+
 export function tageSeit(datum) {
   const d = new Date(datum + 'T12:00:00');
   if (Number.isNaN(d.getTime())) return 0;

@@ -17,15 +17,21 @@ import {
 
 import {
   notwendigkeitsChart, kategorieChart, stichwortChart, verlaufChart, reueChart,
-  leitmetrikBlock, kennzahlenVergleich, deltaListe
+  leitmetrikBlock, kennzahlenVergleich, deltaListe, burndownChart, topfChart
 } from './charts.js';
+
+import {
+  budget, burndown, toepfe, topfDefinition, freieKategorien, heuteIso
+} from './cockpit.js';
 
 const store = new Store();
 
 const LS_AUTO = 'ausgabenbro.autobuchung';
 
 const ui = {
-  ansicht: 'erfassen',
+  ansicht: 'cockpit',
+  analyse: 'monat',
+  topfKategorien: new Set(),
   monat: monatVon(heute()),
   richtung: 'ausgabe',
   kategorie: null,
@@ -54,6 +60,8 @@ function kategorien() {
 }
 
 function kategorienSetzen(liste) { store.configSchreiben('kategorien', JSON.stringify(liste)); }
+
+function toepfeSetzen(liste) { store.configSchreiben('toepfe', JSON.stringify(liste)); }
 
 function einkommenCent() { return Math.round((Number(cfgWert('einkommen', 0)) || 0) * 100); }
 
@@ -94,12 +102,17 @@ function ansichtSetzen(name) {
 function zeichnen() {
   topbarZeichnen();
   reueBadgeZeichnen();
-  if (ui.ansicht === 'erfassen')   erfassenZeichnen();
-  if (ui.ansicht === 'uebersicht') uebersichtZeichnen();
-  if (ui.ansicht === 'vergleich')  vergleichZeichnen();
-  if (ui.ansicht === 'reue')       reueZeichnen();
-  if (ui.ansicht === 'liste')      listeZeichnen();
-  if (ui.ansicht === 'setup')      setupZeichnen();
+  if (ui.ansicht === 'cockpit')  cockpitZeichnen();
+  if (ui.ansicht === 'erfassen') erfassenZeichnen();
+  if (ui.ansicht === 'reue')     reueZeichnen();
+  if (ui.ansicht === 'analyse') {
+    $('#analyse-monat').hidden = ui.analyse !== 'monat';
+    $('#analyse-vergleich').hidden = ui.analyse !== 'vergleich';
+    if (ui.analyse === 'monat') uebersichtZeichnen(); else vergleichZeichnen();
+  }
+  if (ui.ansicht === 'liste') listeZeichnen();
+  if (ui.ansicht === 'setup') setupZeichnen();
+  if (!$('#ampel-widget').hidden) ampelZeichnen();
 }
 
 function topbarZeichnen() {
@@ -120,6 +133,113 @@ function reueBadgeZeichnen() {
   const badge = $('#reue-badge');
   badge.textContent = String(offen);
   badge.hidden = offen === 0;
+}
+
+/* -------------------------------------------------------------- Cockpit */
+
+function cockpitZeichnen() {
+  const b = budget(store.daten, ui.monat, heuteIso());
+  const ziel = $('#cockpit-inhalt');
+
+  if (!b.eingerichtet) {
+    ziel.innerHTML = `<div class="card">
+      <h2>Noch kein Einkommen hinterlegt</h2>
+      <p class="hilfe">Das Cockpit rechnet aus Einkommen minus Fixkosten minus Puffer, wie viel pro Tag \u00fcbrig bleibt. Ohne Einkommen geht das nicht.</p>
+      <button type="button" class="btn-primary" data-sprung="setup">Zu den Einstellungen</button>
+    </div>`;
+    return;
+  }
+
+  ziel.innerHTML = kopfBlock(b) + prognoseBlock(b) + kennzahlenBlock(b)
+    + '<div id="cockpit-chart"></div>'
+    + topfChart(toepfe(store.daten, ui.monat));
+
+  burndownZeichnen();
+}
+
+/** Die eine gro\u00dfe Zahl. */
+function kopfBlock(b) {
+  if (!b.istAktuell) {
+    return `<section class="cockpit-haupt" data-ampel="${b.rest >= 0 ? 'gruen' : 'rot'}">
+      <div class="cockpit-label">\u00dcbrig geblieben im ${esc(monatLabel(b.monat))}</div>
+      <div class="cockpit-wert">${eur(b.rest)}</div>
+      <div class="cockpit-sub">${eur(b.ausgegeben)} ausgegeben von ${eur(b.monatsbudget)} Budget</div>
+    </section>`;
+  }
+
+  const ueber = b.heuteNochFrei < 0;
+  return `<section class="cockpit-haupt" data-ampel="${b.ampel}">
+    <div class="cockpit-label">${ueber ? 'Heute schon dr\u00fcber' : 'Heute noch'}</div>
+    <div class="cockpit-wert">${eur(Math.abs(b.heuteNochFrei))}</div>
+    <div class="cockpit-sub">
+      Tagesbudget ${eur(b.tagesbudget)}${b.heuteAusgegeben ? ' \u00b7 heute ' + eur(b.heuteAusgegeben) + ' ausgegeben' : ' \u00b7 heute noch nichts ausgegeben'}
+    </div>
+  </section>`;
+}
+
+/** Runway: Prognose statt R\u00fcckblick. */
+function prognoseBlock(b) {
+  if (!b.istAktuell) return '';
+  let text, icon = '\u2192';
+
+  if (b.monatsbudget <= 0) {
+    text = `Fixkosten und Puffer zusammen sind so hoch wie dein Einkommen. F\u00fcr den Alltag bleibt rechnerisch nichts \u00fcbrig.`;
+    icon = '\u26a0';
+  } else if (b.rest <= 0) {
+    text = `Dein Budget f\u00fcr diesen Monat ist aufgebraucht \u2013 <strong>${eur(-b.rest)} dr\u00fcber</strong>. Noch ${b.restTage} Tag(e) bis zum Monatsende.`;
+    icon = '\u26a0';
+  } else if (b.nullTag) {
+    text = `Bei deinem Tempo von ${eur(b.tempo)} pro Tag bist du am <strong>${b.nullTag}.</strong> bei null \u2013 ${b.tage - b.nullTag + 1} Tage vor Monatsende.`;
+    icon = '\u26a0';
+  } else if (b.anzahlVariabel < 3) {
+    text = `Noch zu wenige Buchungen f\u00fcr eine Prognose. Ab etwa drei Tagen rechnet die App dir aus, wann du bei null w\u00e4rst.`;
+  } else {
+    text = `Bei deinem Tempo von ${eur(b.tempo)} pro Tag kommst du bis zum Monatsende durch und h\u00e4ttest am Ende noch Luft.`;
+  }
+
+  return `<div class="hinweis-zeile"><span class="hinweis-icon">${icon}</span><span>${text}</span></div>`;
+}
+
+function kennzahlenBlock(b) {
+  return `<div class="kpi-grid">
+    ${kpi('Budget', eurKurz(b.monatsbudget), 'nach Fix und Puffer')}
+    ${kpi('Ausgegeben', eurKurz(b.ausgegeben), b.tagHeute + '. von ' + b.tage + ' Tagen')}
+    ${kpi('\u00dcbrig', eurKurz(b.rest), b.istAktuell ? 'f\u00fcr ' + b.restTage + ' Tag(e)' : 'am Monatsende', b.rest < 0)}
+    ${kpi('Puffer', eurKurz(b.puffer), 'vorab zur\u00fcckgelegt')}
+  </div>`;
+}
+
+/** Das SVG braucht die Pixelbreite, deshalb erst nach dem Einh\u00e4ngen. */
+function burndownZeichnen() {
+  const halter = $('#cockpit-chart');
+  if (!halter) return;
+  const breite = halter.clientWidth || 320;
+  halter.innerHTML = burndownChart(burndown(store.daten, ui.monat, heuteIso()), breite);
+}
+
+/* --------------------------------------------------------- Ampel-Widget */
+
+function ampelZeichnen() {
+  const b = budget(store.daten, monatVon(heuteIso()), heuteIso());
+  const ziel = $('#ampel-widget');
+  const url = location.origin + location.pathname + location.hash;
+
+  if (!b.eingerichtet) {
+    ziel.innerHTML = `<a class="ampel-inhalt" data-ampel="grau" href="${esc(url)}" target="_blank" rel="noopener">
+      <span class="ampel-punkt"></span>
+      <span class="ampel-text"><span class="ampel-sub">Noch nicht eingerichtet \u2013 hier \u00f6ffnen</span></span>
+    </a>`;
+    return;
+  }
+
+  const ueber = b.heuteNochFrei < 0;
+  ziel.innerHTML = `<a class="ampel-inhalt" data-ampel="${b.ampel}" href="${esc(url)}" target="_blank" rel="noopener">
+    <span class="ampel-punkt"></span>
+    <span class="ampel-text">
+      <span class="ampel-wert">${ueber ? '\u2212' : ''}${eur(Math.abs(b.heuteNochFrei))}</span>
+      <span class="ampel-sub">${ueber ? 'heute dr\u00fcber' : 'heute noch'} \u00b7 ${eur(b.rest)} bis ${b.tage}.</span>
+    </span>
+  </a>`;
 }
 
 /* ------------------------------------------------------------- Erfassen */
@@ -154,10 +274,15 @@ function erfassenZeichnen() {
     .filter((x) => x.datum === heute())
     .reduce((s, x) => s + Math.round((Number(x.betrag) || 0) * 100), 0);
 
-  $('#heute-leiste').innerHTML =
-    `<span>Heute <strong>${eur(heuteCent)}</strong></span>
-     <span>${esc(monatLabel(ui.monat))} <strong>${eur(a.gesamt)}</strong></span>
-     <span>unn&ouml;tig <strong style="color:var(${a.unnoetig > 0 ? '--kritisch' : '--text'})">${eurKurz(a.unnoetig)}</strong></span>`;
+  const b = budget(store.daten, ui.monat, heuteIso());
+  const ampelFarbe = { gruen: '--gut', gelb: '--warnung', rot: '--kritisch', grau: '--muted' }[b.ampel];
+  $('#heute-leiste').innerHTML = b.eingerichtet && b.istAktuell
+    ? `<span>Heute noch <strong style="color:var(${ampelFarbe})">${b.heuteNochFrei < 0 ? '\u2212' : ''}${eur(Math.abs(b.heuteNochFrei))}</strong></span>
+       <span>\u00dcbrig <strong>${eur(b.rest)}</strong></span>
+       <span>${esc(monatLabel(ui.monat))} <strong>${eur(a.gesamt)}</strong></span>`
+    : `<span>Heute <strong>${eur(heuteCent)}</strong></span>
+       <span>${esc(monatLabel(ui.monat))} <strong>${eur(a.gesamt)}</strong></span>
+       <span>unn\u00f6tig <strong style="color:var(${a.unnoetig > 0 ? '--kritisch' : '--text'})">${eurKurz(a.unnoetig)}</strong></span>`;
 
   $('#zuletzt').innerHTML = zuletztHtml();
   bannerZeichnen();
@@ -414,6 +539,18 @@ function setupZeichnen() {
   const basis = baselineMonat(store.daten);
   if (!$('#cfg-baseline').value && basis) $('#cfg-baseline').value = basis;
 
+  const c = store.daten.config || {};
+  if (!$('#cfg-sparrate').value && c.sparrate) $('#cfg-sparrate').value = String(c.sparrate).replace('.', ',');
+  if (!$('#cfg-notgroschen').value && c.notgroschen) $('#cfg-notgroschen').value = String(c.notgroschen).replace('.', ',');
+
+  const b = budget(store.daten, monatVon(heuteIso()), heuteIso());
+  $('#puffer-hinweis').innerHTML = b.eingerichtet
+    ? `${eur(b.einkommen)} Einkommen \u2212 ${eur(b.fix)} Fixkosten \u2212 ${eur(b.puffer)} Puffer =
+       <strong>${eur(b.monatsbudget)}</strong> f\u00fcr den Alltag, also ${eur(Math.floor(b.monatsbudget / b.tage))} pro Tag.`
+    : 'Trag zuerst dein Einkommen ein.';
+
+  toepfeSetupZeichnen();
+
   const davor = datenVorBaseline(store.daten);
   $('#baseline-hinweis').innerHTML = davor
     ? `Aktuell: <strong>${esc(monatLabel(basis))}</strong>. ${davor} Buchung(en) liegen davor \u2013 sie bleiben erhalten, z\u00e4hlen aber nicht zur Basis und erscheinen nicht im Verlauf.`
@@ -444,6 +581,31 @@ function setupZeichnen() {
     `${(store.daten.ausgaben || []).length} Ausgaben, ${(store.daten.einnahmen || []).length} Einnahmen lokal.`
     + (offen ? ` ${offen} Änderung(en) warten auf die Tabelle.` : '')
     + (store.zuletztSync ? ` Letzter Abgleich: ${new Date(store.zuletztSync).toLocaleString('de-DE')}.` : '');
+}
+
+function toepfeSetupZeichnen() {
+  const definition = topfDefinition(store.daten);
+  const stand = toepfe(store.daten, monatVon(heuteIso()));
+
+  $('#toepfe-liste').innerHTML = definition.length
+    ? `<div class="eintrag-liste">${definition.map((t, i) => {
+        const ist = stand.find((x) => x.name === t.name);
+        return `<div class="eintrag">
+          <span class="eintrag-balken" style="--stufe:var(--noetig)"></span>
+          <span class="eintrag-haupt">
+            <span class="eintrag-titel">${esc(t.name)}</span>
+            <span class="eintrag-meta">${esc((t.kategorien || []).join(', ') || 'keine Kategorie')}</span>
+          </span>
+          <span class="eintrag-betrag">${eur(Math.round((Number(t.betrag) || 0) * 100))}</span>
+          <button type="button" class="eintrag-aktion" data-topf-weg="${i}" title="L\u00f6schen">&times;</button>
+        </div>`;
+      }).join('')}</div>`
+    : `<p class="leer">Noch keine T\u00f6pfe angelegt.</p>`;
+
+  const frei = freieKategorien(store.daten, kategorien());
+  $('#t-kategorien').innerHTML = frei.length
+    ? frei.map((k) => `<button type="button" class="chip${ui.topfKategorien.has(k) ? ' aktiv' : ''}" data-topf-kat="${esc(k)}">${esc(k)}</button>`).join('')
+    : '<span class="hilfe">Alle Kategorien sind schon einem Topf zugeordnet.</span>';
 }
 
 function vorlagenListeHtml(vorlagen) {
@@ -789,6 +951,11 @@ function onboardingVerdrahten() {
   });
 }
 
+function analyseSetzen(welche) {
+  ui.analyse = welche;
+  $$('#analyse-schalter button').forEach((x) => x.classList.toggle('aktiv', x.dataset.analyse === welche));
+}
+
 /* ========================================================= Verdrahtung */
 
 function verdrahten() {
@@ -897,17 +1064,86 @@ function verdrahten() {
     const spaeter = e.target.closest('[data-ueberspringen]');
     if (spaeter) { ui.zurueckgelegt.add(spaeter.dataset.ueberspringen); reueZeichnen(); return; }
 
+    const topfWeg = e.target.closest('[data-topf-weg]');
+    if (topfWeg) {
+      const liste = topfDefinition(store.daten);
+      const raus = liste[Number(topfWeg.dataset.topfWeg)];
+      liste.splice(Number(topfWeg.dataset.topfWeg), 1);
+      toepfeSetzen(liste);
+      toast(raus ? 'Topf entfernt: ' + raus.name : 'Entfernt.');
+      zeichnen();
+      return;
+    }
+
+    const sprung = e.target.closest('[data-sprung]');
+    if (sprung) { ansichtSetzen(sprung.dataset.sprung); return; }
+
     const katWeg = e.target.closest('[data-kat-weg]');
     if (katWeg) { kategorienSetzen(kategorien().filter((k) => k !== katWeg.dataset.katWeg)); zeichnen(); return; }
 
     const banner = e.target.closest('[data-banner]');
     if (banner) {
       const was = banner.dataset.banner;
-      if (was === 'vergleich') { store.configSchreiben('abschlussGesehen', monatVon(heute())); ui.monat = monatVerschieben(monatVon(heute()), -1); ansichtSetzen('vergleich'); }
+      if (was === 'vergleich') {
+        store.configSchreiben('abschlussGesehen', monatVon(heute()));
+        ui.monat = monatVerschieben(monatVon(heute()), -1);
+        analyseSetzen('vergleich');
+        ansichtSetzen('analyse');
+      }
       if (was === 'abschluss-ok') { store.configSchreiben('abschlussGesehen', monatVon(heute())); zeichnen(); }
       if (was === 'auto-undo') { autoRueckgaengig(); zeichnen(); }
       if (was === 'auto-ok') { schreiben(LS_AUTO, null); zeichnen(); }
     }
+  });
+
+  $('#analyse-schalter').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-analyse]');
+    if (!btn) return;
+    analyseSetzen(btn.dataset.analyse);
+    zeichnen();
+  });
+
+  // Kategorie-Auswahl im Topf-Formular
+  $('#t-kategorien').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-topf-kat]');
+    if (!chip) return;
+    const k = chip.dataset.topfKat;
+    if (ui.topfKategorien.has(k)) ui.topfKategorien.delete(k); else ui.topfKategorien.add(k);
+    chip.classList.toggle('aktiv');
+  });
+
+  $('#form-topf').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('#t-name').value.trim();
+    const cent = betragParsen($('#t-betrag').value);
+    if (!name) { toast('Name fehlt.', true); return; }
+    if (!Number.isFinite(cent) || cent <= 0) { toast('Limit pruefen.', true); return; }
+    if (!ui.topfKategorien.size) { toast('Mindestens eine Kategorie waehlen \u2013 sonst faengt der Topf nichts auf.', true); return; }
+    if (topfDefinition(store.daten).some((t) => t.name.toLowerCase() === name.toLowerCase())) {
+      toast('Topf mit dem Namen gibt es schon.', true); return;
+    }
+    toepfeSetzen(topfDefinition(store.daten).concat({
+      name, betrag: zuEuro(cent), kategorien: Array.from(ui.topfKategorien)
+    }));
+    ui.topfKategorien.clear();
+    $('#t-name').value = ''; $('#t-betrag').value = '';
+    toast('Topf angelegt: ' + name);
+    zeichnen();
+  });
+
+  $('#cfg-puffer-speichern').addEventListener('click', () => {
+    const werte = {};
+    for (const [feld, schluessel] of [['#cfg-sparrate', 'sparrate'], ['#cfg-notgroschen', 'notgroschen']]) {
+      const roh = $(feld).value.trim();
+      if (!roh) { werte[schluessel] = ''; continue; }
+      const c = betragParsen(roh);
+      if (!Number.isFinite(c) || c < 0) { toast('Betrag pruefen.', true); return; }
+      werte[schluessel] = zuEuro(c);
+    }
+    store.configSchreiben('sparrate', werte.sparrate);
+    store.configSchreiben('notgroschen', werte.notgroschen);
+    toast('Puffer gespeichert.');
+    zeichnen();
   });
 
   $('#liste-suche').addEventListener('input', (e) => { ui.listeSuche = e.target.value; listeZeichnen(); });
@@ -1009,23 +1245,45 @@ function verdrahten() {
   });
 
   document.addEventListener('visibilitychange', () => { if (!document.hidden) store.synchronisieren(); });
+
+  // Das SVG rechnet in Pixeln, also bei Breitenaenderung neu aufbauen.
+  let groesseTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(groesseTimer);
+    groesseTimer = setTimeout(() => { if (ui.ansicht === 'cockpit') burndownZeichnen(); }, 150);
+  });
 }
 
 /* ============================================================== Startup */
+
+/** Schlanke Ampel fuer ein kleines Notion-Embed: ?ansicht=ampel */
+function istWidget() {
+  try { return new URLSearchParams(location.search).get('ansicht') === 'ampel'; }
+  catch (err) { return false; }
+}
 
 function start() {
   themeAnwenden(lesen(SPEICHER.theme, 'auto'));
   $('#datum').value = heute();
   $('#e-datum').value = heute();
 
+  const widget = istWidget();
+  if (widget) {
+    document.body.classList.add('nur-widget');
+    $('#ampel-widget').hidden = false;
+  }
+
   verdrahten();
   store.abonnieren(() => {
     if (store.status === 'ok') autoBuchen();
+    if (widget) { ampelZeichnen(); return; }
     if ($('#onboarding').hidden) zeichnen(); else topbarZeichnen();
   });
-  ansichtSetzen('erfassen');
+
+  if (!widget) ansichtSetzen('cockpit');
 
   const fertig = () => {
+    if (widget) { autoBuchen(); ampelZeichnen(); return; }
     if (cfgWert('onboarding', '') !== 'fertig') onboardingStarten();
     else { autoBuchen(); zeichnen(); }
   };

@@ -32,16 +32,47 @@ Daraus entstehen drei Dinge:
   Gleiche Wörter werden unabhängig von Schreibweise zusammengefasst.
   Kategorien sind grob, Stichwörter sind die Ebene, auf der du entscheidest.
 
+## Das Cockpit
+
+Die Startansicht steuert, statt zurückzublicken. Sie beantwortet eine Frage:
+**was darf ich heute noch ausgeben?**
+
+| Baustein | Was es tut |
+|---|---|
+| **Puffer zuerst** | Sparrate und Notgroschen werden vom Einkommen abgezogen, *bevor* irgendetwas als verfügbar gilt |
+| **Tagesbudget** | (Einkommen − Fixkosten − Puffer − bisher ausgegeben) ÷ Resttage. Eine große Zahl. |
+| **Runway** | „Bei deinem Tempo von 43 € pro Tag bist du am 24. bei null" — Prognose, kein Rückblick |
+| **Burn-Down** | Ist-Linie gegen Soll-Linie über den Monat, mit Abstand in Euro |
+| **Töpfe** | Eigenes Limit je Bereich. Jede Kategorie gehört zu höchstens einem Topf. |
+| **Ampel** | Grün / Gelb / Rot, auch als eigenes Mini-Embed |
+
+Das Tagesbudget **steht innerhalb eines Tages fest**: Es wird aus dem Stand vor
+der ersten heutigen Buchung gerechnet. Gibst du 25 € aus, sinkt „Heute noch"
+um genau 25 €. Würde die App fortlaufend neu verteilen, sänke die Anzeige um
+mehr als den ausgegebenen Betrag — verwirrend und demotivierend. Neu verteilt
+wird erst am nächsten Tag.
+
+Die Ampel richtet sich nach drei Bedingungen, in dieser Reihenfolge:
+
+- **Rot** — Budget aufgebraucht, oder die Prognose sagt null vor Monatsende
+- **Gelb** — heute schon über dem Tagesbudget, oder hinter der Soll-Linie
+- **Grün** — sonst
+
+Belegt ist daran das Umschlagprinzip: Soman & Cheema (2011) zeigen
+experimentell, dass die Partitionierung von Geld den Konsum senkt — die
+mentale Hürde, einen zweiten Umschlag zu öffnen, wirkt. Dazu Thalers Mental
+Accounting (1985).
+
 ## Die sechs Ansichten
 
 | Tab | Inhalt |
 |---|---|
-| **Erfassen** | Betrag → Kategorie → Stichwort → Notwendigkeit. Umschalter für Einnahmen. |
-| **Übersicht** | Kennzahlen des Monats, Verteilung nach Notwendigkeit, Kategorien, Stichwörter, Reue-Ranking |
-| **Vergleich** | Dieser Monat gegen Vormonat gegen Startmonat. Was ist teurer, was günstiger geworden — je Kategorie und je Stichwort. |
+| **Cockpit** | Tagesbudget, Runway, Burn-Down, Töpfe |
+| **Erfassen** | Betrag → Kategorie → Stichwort → Notwendigkeit. Umschalter für Einnahmen. Oben die Tagesbudget-Leiste. |
 | **Reue** | Eine Karte pro Ausgabe, rückblickende Bewertung |
+| **Analyse** | Umschalter: *Dieser Monat* (Notwendigkeit, Kategorien, Stichwörter, Reue-Ranking) und *Monatsvergleich* (gegen Vormonat und Startmonat) |
 | **Liste** | Alle Buchungen des Monats, Suche und Filter |
-| **Setup** | Verbindung, Einkommen, Fixkosten, Kategorien, Export |
+| **Setup** | Verbindung, Einkommen, Puffer, Startmonat, Fixkosten, Töpfe, Kategorien, Export |
 
 Alles ist monatsbasiert. Die Messlatte im Vergleich ist der **Startmonat**:
 voreingestellt **November 2026**, änderbar unter Setup → Startmonat. Monate
@@ -114,6 +145,18 @@ Browser.
    Zugangsdaten im `#`-Fragment und wird in die Zwischenablage kopiert.
 2. In Notion `/embed` eingeben, den Link einfügen, Höhe auf ca. 900 px ziehen.
 
+### Ampel als Mini-Embed
+
+Für ganz oben auf der Notion-Seite gibt es eine schlanke Statuszeile: dieselbe
+URL mit `?ansicht=ampel` **vor** dem `#`-Teil, also
+
+```
+https://<dein-name>.github.io/AusgabenBro/?ansicht=ampel#c=…
+```
+
+Das rendert nur „Heute noch 48,59 € · 904,72 € bis 30." mit farbigem Rand,
+braucht rund 110 px Höhe und verlinkt auf die volle App.
+
 Der Umweg über den Link ist bewusst: Browser behandeln Speicher in einem
 fremden iframe getrennt und löschen ihn teilweise automatisch. Steckt die
 Konfiguration im Link, überlebt sie das.
@@ -139,7 +182,7 @@ Konfiguration im Link, überlebt sie das.
 | `Ausgaben` | id, erstellt, datum, betrag, kategorie, notwendigkeit (0–4), stichwort, reue (gut/neutral/schlecht), reueAm |
 | `Einnahmen` | id, erstellt, datum, betrag, quelle, notiz |
 | `Vorlagen` | id, name, betrag, kategorie, tag, aktiv, zuletzt |
-| `Config` | key, value — `kategorien`, `einkommen`, `baseline`, `onboarding`, `zuletztGebucht`, `abschlussGesehen` |
+| `Config` | key, value — `kategorien`, `einkommen`, `sparrate`, `notgroschen`, `toepfe`, `baseline`, `onboarding`, `zuletztGebucht`, `abschlussGesehen` |
 
 Die Tabelle bleibt von Hand lesbar und bearbeitbar. Änderungen dort erscheinen
 beim nächsten Abgleich in der App.
@@ -176,6 +219,7 @@ index.html              Gerüst aller Ansichten plus Onboarding-Overlay
 assets/kern.js          Konstanten, Geld- und Datumslogik (alles in Cent)
 assets/daten.js         Cache, Warteschlange, Transport zum Backend
 assets/auswertung.js    Kennzahlen, Stichwort-Gruppierung, Monatsvergleich
+assets/cockpit.js       Tagesbudget, Runway, Burn-Down, Töpfe (alles in Cent)
 assets/charts.js        Diagramme und Vergleichsblöcke als HTML/CSS
 assets/app.js           Ansichten, Ereignisse, Onboarding, Automatikbuchung
 assets/style.css        Design-Token und Layout

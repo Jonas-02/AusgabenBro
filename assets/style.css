@@ -767,3 +767,73 @@ details.tabelle-aufklapp summary:hover { color: var(--text-2); text-decoration: 
   .tab { padding: 7px 6px; font-size: 0.75rem; }
   main { padding-inline: 12px; }
 }
+
+
+/* =============================================================== Cockpit */
+
+.cockpit-haupt {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--ampel, var(--muted));
+  border-radius: var(--radius);
+  padding: 18px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cockpit-haupt[data-ampel="gruen"] { --ampel: var(--gut); }
+.cockpit-haupt[data-ampel="gelb"]  { --ampel: var(--warnung); }
+.cockpit-haupt[data-ampel="rot"]   { --ampel: var(--kritisch); }
+.cockpit-haupt[data-ampel="grau"]  { --ampel: var(--muted); }
+
+.cockpit-label {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--muted);
+}
+.cockpit-wert {
+  font-size: 2.9rem; font-weight: 650; letter-spacing: -0.04em; line-height: 1.02;
+  color: var(--ampel, var(--text));
+}
+.cockpit-haupt[data-ampel="gruen"] .cockpit-wert { color: var(--text); }
+.cockpit-sub { font-size: 0.78rem; color: var(--text-2); margin-top: 4px; line-height: 1.45; }
+
+/* Linien-Legende des Burn-Down */
+.legende-strich { width: 14px; height: 0; border-top-width: 2px; border-top-style: solid; flex: none; }
+.legende-strich.ist  { border-color: var(--noetig); }
+.legende-strich.soll { border-color: var(--axis); border-top-style: dashed; }
+
+.topf-form { display: flex; flex-direction: column; gap: 8px; }
+
+/* ========================================================= Ampel-Widget */
+
+body.nur-widget > .topbar,
+body.nur-widget > .tabs,
+body.nur-widget > main { display: none; }
+
+body.nur-widget { background: var(--plane); min-height: 0; }
+
+.ampel-widget { padding: 10px; }
+
+.ampel-inhalt {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--ampel, var(--muted));
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+}
+.ampel-inhalt:hover { border-color: var(--border-stark); border-left-color: var(--ampel, var(--muted)); }
+.ampel-inhalt[data-ampel="gruen"] { --ampel: var(--gut); }
+.ampel-inhalt[data-ampel="gelb"]  { --ampel: var(--warnung); }
+.ampel-inhalt[data-ampel="rot"]   { --ampel: var(--kritisch); }
+.ampel-inhalt[data-ampel="grau"]  { --ampel: var(--muted); }
+
+.ampel-punkt {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ampel, var(--muted)); flex: none;
+}
+.ampel-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ampel-wert { font-size: 1.5rem; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; }
+.ampel-sub { font-size: 0.76rem; color: var(--text-2); }

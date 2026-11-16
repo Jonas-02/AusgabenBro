@@ -29,18 +29,23 @@
 </header>
 
 <nav class="tabs" role="tablist">
+  <button type="button" role="tab" class="tab" data-view="cockpit">Cockpit</button>
   <button type="button" role="tab" class="tab" data-view="erfassen">Erfassen</button>
-  <button type="button" role="tab" class="tab" data-view="uebersicht">&Uuml;bersicht</button>
-  <button type="button" role="tab" class="tab" data-view="vergleich">Vergleich</button>
   <button type="button" role="tab" class="tab" data-view="reue">Reue<span class="badge" id="reue-badge" hidden>0</span></button>
+  <button type="button" role="tab" class="tab" data-view="analyse">Analyse</button>
   <button type="button" role="tab" class="tab" data-view="liste">Liste</button>
   <button type="button" role="tab" class="tab" data-view="setup">Setup</button>
 </nav>
 
 <main id="main">
 
+  <!-- ======================================================= COCKPIT -->
+  <section class="view" data-view="cockpit">
+    <div id="cockpit-inhalt"></div>
+  </section>
+
   <!-- ====================================================== ERFASSEN -->
-  <section class="view" data-view="erfassen">
+  <section class="view" data-view="erfassen" hidden>
     <div id="monatsabschluss"></div>
     <div id="autobuchung"></div>
 
@@ -108,15 +113,19 @@
     <div id="zuletzt"></div>
   </section>
 
-  <!-- ===================================================== UEBERSICHT -->
-  <section class="view" data-view="uebersicht" hidden>
-    <div class="kpi-grid" id="kpis"></div>
-    <div id="charts"></div>
-  </section>
-
-  <!-- ====================================================== VERGLEICH -->
-  <section class="view" data-view="vergleich" hidden>
-    <div id="vergleich-inhalt"></div>
+  <!-- ======================================================== ANALYSE -->
+  <section class="view" data-view="analyse" hidden>
+    <div class="seg-switch seg-wide" id="analyse-schalter">
+      <button type="button" class="aktiv" data-analyse="monat">Dieser Monat</button>
+      <button type="button" data-analyse="vergleich">Monatsvergleich</button>
+    </div>
+    <div id="analyse-monat">
+      <div class="kpi-grid" id="kpis"></div>
+      <div id="charts"></div>
+    </div>
+    <div id="analyse-vergleich" hidden>
+      <div id="vergleich-inhalt"></div>
+    </div>
   </section>
 
   <!-- ========================================================== REUE -->
@@ -169,6 +178,32 @@
     </div>
 
     <div class="card">
+      <h2>Puffer zuerst</h2>
+      <p class="hilfe">Sparrate und Notgroschen werden vom Einkommen abgezogen, <strong>bevor</strong> irgendetwas als verf&uuml;gbar gilt. Erst der Rest wird auf die Tage verteilt.</p>
+      <div class="vorlage-form">
+        <input type="text" id="cfg-sparrate" class="eingabe" inputmode="decimal" placeholder="Sparrate / Monat">
+        <input type="text" id="cfg-notgroschen" class="eingabe" inputmode="decimal" placeholder="Notgroschen / Monat">
+        <button type="button" class="btn-ghost" id="cfg-puffer-speichern">Speichern</button>
+      </div>
+      <p class="hilfe" id="puffer-hinweis"></p>
+    </div>
+
+    <div class="card">
+      <h2>T&ouml;pfe</h2>
+      <p class="hilfe">Ein eigenes Limit je Bereich. Jede Kategorie geh&ouml;rt zu h&ouml;chstens einem Topf; was keinem zugeordnet ist, l&auml;uft sichtbar unter &bdquo;Nicht zugeordnet&ldquo;.</p>
+      <div id="toepfe-liste"></div>
+      <form id="form-topf" class="topf-form" autocomplete="off">
+        <div class="vorlage-form">
+          <input type="text" id="t-name" class="eingabe" placeholder="Name, z.B. Essen" required>
+          <input type="text" id="t-betrag" class="eingabe" inputmode="decimal" placeholder="Limit" required>
+        </div>
+        <div class="feld-label">Kategorien</div>
+        <div class="chips" id="t-kategorien"></div>
+        <button type="submit" class="btn-ghost">Topf anlegen</button>
+      </form>
+    </div>
+
+    <div class="card">
       <h2>Monatliche Fixkosten</h2>
       <p class="hilfe">Miete, Versicherungen, Abos. Werden zu Beginn jedes Monats automatisch als Stufe&nbsp;0 gebucht.</p>
       <div id="vorlagen-liste"></div>
@@ -215,6 +250,8 @@
     </div>
   </div>
 </div>
+
+<div class="ampel-widget" id="ampel-widget" hidden></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
