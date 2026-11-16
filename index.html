@@ -31,8 +31,6 @@
 <nav class="tabs" role="tablist">
   <button type="button" role="tab" class="tab" data-view="cockpit">Cockpit</button>
   <button type="button" role="tab" class="tab" data-view="erfassen">Erfassen</button>
-  <button type="button" role="tab" class="tab" data-view="reue">Reue<span class="badge" id="reue-badge" hidden>0</span></button>
-  <button type="button" role="tab" class="tab" data-view="analyse">Analyse</button>
   <button type="button" role="tab" class="tab" data-view="liste">Liste</button>
   <button type="button" role="tab" class="tab" data-view="setup">Setup</button>
 </nav>
@@ -65,30 +63,16 @@
         <div class="chips" id="kategorie-chips"></div>
       </div>
 
-      <div class="feld">
-        <div class="feld-kopf">
-          <span class="feld-label">Stichwort</span>
-          <span class="feld-hint">optional, wird zusammengefasst</span>
-        </div>
-        <div class="chips" id="stichwort-chips"></div>
-        <input type="text" id="stichwort" class="eingabe" list="stichwort-liste"
-               placeholder="z.B. Zigaretten, Lieferando, Feierabendbier" maxlength="40">
-        <datalist id="stichwort-liste"></datalist>
-      </div>
-
-      <div class="feld">
-        <div class="feld-kopf">
-          <span class="feld-label">Wie n&ouml;tig war das?</span>
-          <span class="feld-hint" id="notwendigkeit-hint"></span>
-        </div>
-        <div class="skala" id="notwendigkeit-skala"></div>
-      </div>
-
       <details class="mehr">
-        <summary>Anderes Datum</summary>
+        <summary>Datum &amp; Fixkosten</summary>
         <div class="mehr-inhalt">
           <label class="feld-label" for="datum">Datum</label>
           <input type="date" id="datum" class="eingabe">
+          <label class="haken">
+            <input type="checkbox" id="ist-fix">
+            <span>Fixkosten &ndash; z&auml;hlt nicht ins Tagesbudget</span>
+          </label>
+          <p class="hilfe">Nur f&uuml;r Posten, die du nicht steuern kannst. Wiederkehrende Fixkosten legst du besser unter Setup als Vorlage an.</p>
         </div>
       </details>
 
@@ -113,33 +97,14 @@
     <div id="zuletzt"></div>
   </section>
 
-  <!-- ======================================================== ANALYSE -->
-  <section class="view" data-view="analyse" hidden>
-    <div class="seg-switch seg-wide" id="analyse-schalter">
-      <button type="button" class="aktiv" data-analyse="monat">Dieser Monat</button>
-      <button type="button" data-analyse="vergleich">Monatsvergleich</button>
-    </div>
-    <div id="analyse-monat">
-      <div class="kpi-grid" id="kpis"></div>
-      <div id="charts"></div>
-    </div>
-    <div id="analyse-vergleich" hidden>
-      <div id="vergleich-inhalt"></div>
-    </div>
-  </section>
-
-  <!-- ========================================================== REUE -->
-  <section class="view" data-view="reue" hidden>
-    <div id="reue-inhalt"></div>
-  </section>
-
   <!-- ========================================================= LISTE -->
   <section class="view" data-view="liste" hidden>
     <div class="filterzeile">
-      <input type="search" id="liste-suche" class="eingabe" placeholder="Suchen (Kategorie, Stichwort)">
+      <input type="search" id="liste-suche" class="eingabe" placeholder="Suchen (Kategorie, Quelle)">
       <select id="liste-filter" class="eingabe">
-        <option value="alle">Alle Stufen</option>
-        <option value="unnoetig">Nur Impuls + Reue</option>
+        <option value="alle">Alles</option>
+        <option value="variabel">Nur variable Ausgaben</option>
+        <option value="fix">Nur Fixkosten</option>
         <option value="einnahmen">Nur Einnahmen</option>
       </select>
     </div>
@@ -169,7 +134,7 @@
         <input type="text" id="cfg-einkommen" class="eingabe" inputmode="decimal" placeholder="z.B. 2400">
         <button type="button" class="btn-ghost" id="cfg-einkommen-speichern">Speichern</button>
       </div>
-      <p class="hilfe">Der <strong>Startmonat</strong> ist die Messlatte im Tab Vergleich. Monate davor z&auml;hlen nicht als Basis und tauchen im Verlauf nicht auf.</p>
+      <p class="hilfe">Der <strong>Startmonat</strong> begrenzt den Verlauf. Monate davor bleiben erhalten, tauchen dort aber nicht auf.</p>
       <div class="vorlage-form">
         <input type="month" id="cfg-baseline" class="eingabe">
         <button type="button" class="btn-ghost" id="cfg-baseline-speichern">Speichern</button>
@@ -205,7 +170,7 @@
 
     <div class="card">
       <h2>Monatliche Fixkosten</h2>
-      <p class="hilfe">Miete, Versicherungen, Abos. Werden zu Beginn jedes Monats automatisch als Stufe&nbsp;0 gebucht.</p>
+      <p class="hilfe">Miete, Versicherungen, Abos. Werden zu Beginn jedes Monats automatisch gebucht und bleiben aus dem Tagesbudget heraus.</p>
       <div id="vorlagen-liste"></div>
       <form id="form-vorlage" class="vorlage-form" autocomplete="off">
         <input type="text" id="v-name" class="eingabe" placeholder="Bezeichnung" required>

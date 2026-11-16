@@ -3,30 +3,20 @@
    zur Anzeige bzw. beim Schreiben ins Sheet in Euro umgewandelt. */
 
 export const STUFEN = [
-  { wert: 0, kurz: 'Fix',     name: 'Fixkosten',       hinweis: 'Läuft automatisch: Miete, Versicherung, Abo', token: '--n0' },
-  { wert: 1, kurz: 'Nötig',   name: 'Nötig',          hinweis: 'Hätte so oder so sein müssen',               token: '--n1' },
-  { wert: 2, kurz: 'Geplant', name: 'Geplant gegönnt', hinweis: 'Bewusst entschieden, kein Reue-Kandidat',    token: '--n2' },
-  { wert: 3, kurz: 'Impuls',  name: 'Impuls',          hinweis: 'Spontan – hätte nicht sein müssen',        token: '--n3' },
-  { wert: 4, kurz: 'Reue',    name: 'Reue',            hinweis: 'Würde ich rückgängig machen',              token: '--n4' }
+  { wert: 0, kurz: 'Fix',      name: 'Fixkosten',        token: '--n0',
+    hinweis: 'L\u00e4uft automatisch und z\u00e4hlt nicht ins Tagesbudget' },
+  { wert: 1, kurz: 'Variabel', name: 'Variable Ausgabe', token: '--n1',
+    hinweis: 'Geht vom Tagesbudget ab' }
 ];
 
-export const UNNOETIG_AB = 3;
-
-/** Fester Startmonat fuer den Vergleich. Alles davor zaehlt nicht als Basis
- *  und taucht im Verlauf nicht auf. Ueberschreibbar ueber Setup -> Startmonat
- *  (Config-Schluessel "baseline" in der Tabelle). */
+/** Fester Startmonat. Monate davor erscheinen nicht im Verlauf.
+ *  Ueberschreibbar ueber Setup (Config-Schluessel "baseline"). */
 export const STANDARD_BASELINE = '2026-11';
 
 /** "2026-11" oder leer. Alles andere wird verworfen. */
 export function istMonat(wert) {
   return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(wert || ''));
 }
-
-export const URTEILE = [
-  { wert: 'gut',     icon: '\u{1F44D}', label: 'War es wert', token: '--gut' },
-  { wert: 'neutral', icon: '\u{1F610}', label: 'Geht so',     token: '--n2' },
-  { wert: 'schlecht',icon: '\u{1F44E}', label: 'Verschwendet',token: '--kritisch' }
-];
 
 export const KATEGORIEN_STANDARD = [
   'Wohnen', 'Lebensmittel', 'Restaurant & Bar', 'Lieferdienst', 'Transport',
@@ -131,12 +121,6 @@ export function datumLesbar(datum) {
 
 /* -------------------------------------------------------------- Sonstige */
 
-/** Schluessel fuer die Gruppierung von Stichwoertern: Gross-/Kleinschreibung
- *  und Mehrfach-Leerzeichen sollen nicht zu getrennten Gruppen fuehren. */
-export function normStichwort(text) {
-  return String(text || '').trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
 export function id() {
   if (globalThis.crypto && crypto.randomUUID) return crypto.randomUUID();
   return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
@@ -148,9 +132,13 @@ export function esc(text) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+/** 0 bleibt Fixkosten, alles andere ist variabel - auch die frueheren
+ *  Stufen 2 bis 4 aus der alten Notwendigkeits-Skala. */
 export function stufe(wert) {
-  return STUFEN[Number(wert)] || STUFEN[2];
+  return Number(wert) === 0 ? STUFEN[0] : STUFEN[1];
 }
+
+export function istFix(wert) { return Number(wert) === 0; }
 
 export function $(sel, wurzel = document)  { return wurzel.querySelector(sel); }
 export function $$(sel, wurzel = document) { return Array.from(wurzel.querySelectorAll(sel)); }

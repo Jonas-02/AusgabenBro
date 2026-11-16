@@ -6,31 +6,23 @@ Google-Tabelle als Datenbank.
 
 ## Wofür das gut ist
 
-Normale Tracker beantworten „wofür geht mein Geld weg". Diese App beantwortet
-die Frage dahinter: **wie viel davon hätte nicht sein müssen** — und ob es von
-Monat zu Monat besser wird.
+Normale Tracker beantworten „wofür ist mein Geld weggegangen". Diese App
+beantwortet die Frage davor: **was darf ich heute noch ausgeben?**
 
-Jede Ausgabe bekommt eine Notwendigkeitsstufe:
+Sie steuert, statt zurückzublicken. Das Erfassen ist absichtlich kurz gehalten
+— Betrag eintippen, Kategorie antippen, speichern — weil die Zahl, auf die es
+ankommt, oben steht und nicht erst aus einer Auswertung entsteht.
 
-| Stufe | Bedeutung |
+Ausgaben kennen nur zwei Arten:
+
+| Art | Bedeutung |
 |---|---|
-| 0 Fix | Läuft automatisch: Miete, Versicherung, Abo |
-| 1 Nötig | Hätte so oder so sein müssen |
-| 2 Geplant | Bewusst gegönnt, kein Reue-Kandidat |
-| 3 Impuls | Spontan, hätte nicht sein müssen |
-| 4 Reue | Würde ich rückgängig machen |
+| **Fixkosten** | Läuft automatisch ab: Miete, Versicherung, Abo. Zählt nicht ins Tagesbudget. |
+| **Variabel** | Alles andere. Geht vom Tagesbudget ab. |
 
-Daraus entstehen drei Dinge:
-
-- **€ unnötig** (Leitmetrik): Summe aus Impuls + Reue. Bewusst der absolute
-  Euro-Betrag und nicht die Quote — die Quote kann sinken, während absolut
-  mehr Geld verbrennt. Am Monatsende fehlen Euro, keine Prozentpunkte.
-- **Reue-Check**: Ausgaben ab 7 Tagen Alter werden rückblickend mit
-  👍 / 😐 / 👎 bewertet. Der Abstand ist Absicht — direkt nach dem Kauf fällt
-  die Bewertung systematisch zu positiv aus.
-- **Stichwörter**: ein freies Wort pro Ausgabe („Zigaretten", „Lieferando").
-  Gleiche Wörter werden unabhängig von Schreibweise zusammengefasst.
-  Kategorien sind grob, Stichwörter sind die Ebene, auf der du entscheidest.
+Fixkosten legst du einmal als Vorlage an und sie werden monatlich automatisch
+gebucht. Beim Erfassen musst du dich also normalerweise gar nicht damit
+befassen; für Ausnahmen gibt es ein Häkchen unter „Datum & Fixkosten".
 
 ## Das Cockpit
 
@@ -63,23 +55,21 @@ experimentell, dass die Partitionierung von Geld den Konsum senkt — die
 mentale Hürde, einen zweiten Umschlag zu öffnen, wirkt. Dazu Thalers Mental
 Accounting (1985).
 
-## Die sechs Ansichten
+## Die vier Ansichten
 
 | Tab | Inhalt |
 |---|---|
-| **Cockpit** | Tagesbudget, Runway, Burn-Down, Töpfe |
-| **Erfassen** | Betrag → Kategorie → Stichwort → Notwendigkeit. Umschalter für Einnahmen. Oben die Tagesbudget-Leiste. |
-| **Reue** | Eine Karte pro Ausgabe, rückblickende Bewertung |
-| **Analyse** | Umschalter: *Dieser Monat* (Notwendigkeit, Kategorien, Stichwörter, Reue-Ranking) und *Monatsvergleich* (gegen Vormonat und Startmonat) |
+| **Cockpit** | Tagesbudget, Runway, Burn-Down, Töpfe, Kategorien, Monatsverlauf |
+| **Erfassen** | Betrag → Kategorie → speichern. Umschalter für Einnahmen. Oben die Tagesbudget-Leiste. |
 | **Liste** | Alle Buchungen des Monats, Suche und Filter |
 | **Setup** | Verbindung, Einkommen, Puffer, Startmonat, Fixkosten, Töpfe, Kategorien, Export |
 
-Alles ist monatsbasiert. Die Messlatte im Vergleich ist der **Startmonat**:
+Alles ist monatsbasiert. Der **Startmonat** begrenzt den Verlauf im Cockpit:
 voreingestellt **November 2026**, änderbar unter Setup → Startmonat. Monate
-davor bleiben erhalten und sind über die Monatsnavigation erreichbar, zählen
-aber nicht als Basis und erscheinen nicht im Verlauf — ein Probemonat soll
-nicht zur Messlatte werden. Ist unter Setup nichts gesetzt und der feste
-Standard entfernt, fällt die App auf den ersten Monat mit Daten zurück.
+davor bleiben erhalten und sind über die Monatsnavigation erreichbar, tauchen
+im Verlauf aber nicht auf — ein Probemonat soll die Kurve nicht verzerren.
+Ist unter Setup nichts gesetzt und der feste Standard entfernt, fällt die App
+auf den ersten Monat mit Daten zurück.
 
 Der Standardwert steht als `STANDARD_BASELINE` in `assets/kern.js`; der in der
 Tabelle hinterlegte Wert (`Config`-Schlüssel `baseline`) hat immer Vorrang.
@@ -179,10 +169,14 @@ Konfiguration im Link, überlebt sie das.
 
 | Blatt | Spalten |
 |---|---|
-| `Ausgaben` | id, erstellt, datum, betrag, kategorie, notwendigkeit (0–4), stichwort, reue (gut/neutral/schlecht), reueAm |
+| `Ausgaben` | id, erstellt, datum, betrag, kategorie, notwendigkeit (0 = Fixkosten, 1 = variabel) |
 | `Einnahmen` | id, erstellt, datum, betrag, quelle, notiz |
 | `Vorlagen` | id, name, betrag, kategorie, tag, aktiv, zuletzt |
 | `Config` | key, value — `kategorien`, `einkommen`, `sparrate`, `notgroschen`, `toepfe`, `baseline`, `onboarding`, `zuletztGebucht`, `abschlussGesehen` |
+
+Hast du die App schon vor dem Umbau benutzt, stehen in `Ausgaben` noch die
+Spalten `stichwort`, `reue` und `reueAm`. Die bleiben samt Inhalt erhalten,
+werden aber nicht mehr gelesen. Du kannst sie löschen oder stehen lassen.
 
 Die Tabelle bleibt von Hand lesbar und bearbeitbar. Änderungen dort erscheinen
 beim nächsten Abgleich in der App.
@@ -218,9 +212,9 @@ python3 -m http.server 8080
 index.html              Gerüst aller Ansichten plus Onboarding-Overlay
 assets/kern.js          Konstanten, Geld- und Datumslogik (alles in Cent)
 assets/daten.js         Cache, Warteschlange, Transport zum Backend
-assets/auswertung.js    Kennzahlen, Stichwort-Gruppierung, Monatsvergleich
+assets/auswertung.js    Monatskennzahlen, Startmonat, Verlauf
 assets/cockpit.js       Tagesbudget, Runway, Burn-Down, Töpfe (alles in Cent)
-assets/charts.js        Diagramme und Vergleichsblöcke als HTML/CSS
+assets/charts.js        Diagramme als HTML/CSS, Burn-Down als SVG
 assets/app.js           Ansichten, Ereignisse, Onboarding, Automatikbuchung
 assets/style.css        Design-Token und Layout
 apps-script/Code.gs     Backend für Google Sheets

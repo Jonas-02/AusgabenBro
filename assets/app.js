@@ -1,23 +1,20 @@
 /* AusgabenBro - Oberflaeche und Verdrahtung. */
 
 import {
-  STUFEN, URTEILE, KATEGORIEN_STANDARD, UNNOETIG_AB,
-  betragParsen, zuEuro, eur, eurKurz, eurDelta, prozent, normStichwort, istMonat,
-  heute, monatVon, monatLabel, monatVerschieben, datumLesbar, tageSeit,
+  KATEGORIEN_STANDARD, istFix, istMonat,
+  betragParsen, zuEuro, eur, eurKurz,
+  heute, monatVon, monatLabel, monatVerschieben, datumLesbar,
   id, esc, stufe, $, $$
 } from './kern.js';
 
 import { Store, SPEICHER, lesen, schreiben, configKodieren } from './daten.js';
 
 import {
-  monatsAuswertung, verlauf, vergleich, reueRanking, offeneReue,
-  stichwortVorschlaege, alleStichwoerter, erfassteMonate,
-  baselineMonat, datenVorBaseline
+  monatsAuswertung, verlauf, baselineMonat, datenVorBaseline
 } from './auswertung.js';
 
 import {
-  notwendigkeitsChart, kategorieChart, stichwortChart, verlaufChart, reueChart,
-  leitmetrikBlock, kennzahlenVergleich, deltaListe, burndownChart, topfChart
+  kategorieChart, verlaufChart, burndownChart, topfChart
 } from './charts.js';
 
 import {
@@ -30,15 +27,12 @@ const LS_AUTO = 'ausgabenbro.autobuchung';
 
 const ui = {
   ansicht: 'cockpit',
-  analyse: 'monat',
   topfKategorien: new Set(),
   monat: monatVon(heute()),
   richtung: 'ausgabe',
   kategorie: null,
-  notwendigkeit: null,
   listeSuche: '',
-  listeFilter: 'alle',
-  zurueckgelegt: new Set()
+  listeFilter: 'alle'
 };
 
 /* ================================================================ Helfer */
@@ -101,17 +95,10 @@ function ansichtSetzen(name) {
 
 function zeichnen() {
   topbarZeichnen();
-  reueBadgeZeichnen();
   if (ui.ansicht === 'cockpit')  cockpitZeichnen();
   if (ui.ansicht === 'erfassen') erfassenZeichnen();
-  if (ui.ansicht === 'reue')     reueZeichnen();
-  if (ui.ansicht === 'analyse') {
-    $('#analyse-monat').hidden = ui.analyse !== 'monat';
-    $('#analyse-vergleich').hidden = ui.analyse !== 'vergleich';
-    if (ui.analyse === 'monat') uebersichtZeichnen(); else vergleichZeichnen();
-  }
-  if (ui.ansicht === 'liste') listeZeichnen();
-  if (ui.ansicht === 'setup') setupZeichnen();
+  if (ui.ansicht === 'liste')    listeZeichnen();
+  if (ui.ansicht === 'setup')    setupZeichnen();
   if (!$('#ampel-widget').hidden) ampelZeichnen();
 }
 
@@ -126,13 +113,6 @@ function topbarZeichnen() {
     fehler:  'Fehler: ' + (store.fehler || 'unbekannt') + (offen ? ' – ' + offen + ' Änderung(en) warten lokal' : ''),
     offline: 'Nicht verbunden – im Tab Setup einrichten'
   }[store.status] || '';
-}
-
-function reueBadgeZeichnen() {
-  const offen = offeneReue(store.daten).length;
-  const badge = $('#reue-badge');
-  badge.textContent = String(offen);
-  badge.hidden = offen === 0;
 }
 
 /* -------------------------------------------------------------- Cockpit */
@@ -152,7 +132,9 @@ function cockpitZeichnen() {
 
   ziel.innerHTML = kopfBlock(b) + prognoseBlock(b) + kennzahlenBlock(b)
     + '<div id="cockpit-chart"></div>'
-    + topfChart(toepfe(store.daten, ui.monat));
+    + topfChart(toepfe(store.daten, ui.monat))
+    + kategorieChart(monatsAuswertung(store.daten, ui.monat))
+    + verlaufChart(verlauf(store.daten, ui.monat, 6), ui.monat);
 
   burndownZeichnen();
 }
@@ -198,6 +180,14 @@ function prognoseBlock(b) {
   }
 
   return `<div class="hinweis-zeile"><span class="hinweis-icon">${icon}</span><span>${text}</span></div>`;
+}
+
+function kpi(label, wert, sub, alarm) {
+  return `<div class="kpi">
+    <span class="kpi-label">${esc(label)}</span>
+    <span class="kpi-wert${alarm ? ' alarm' : ''}">${esc(wert)}</span>
+    <span class="kpi-sub">${esc(sub)}</span>
+  </div>`;
 }
 
 function kennzahlenBlock(b) {
@@ -252,23 +242,6 @@ function erfassenZeichnen() {
     `<button type="button" class="chip${k === ui.kategorie ? ' aktiv' : ''}" data-kategorie="${esc(k)}">${esc(k)}</button>`
   ).join('');
 
-  const aktuell = normStichwort($('#stichwort').value);
-  $('#stichwort-chips').innerHTML = stichwortVorschlaege(store.daten, 6).map((g) =>
-    `<button type="button" class="chip${g.norm === aktuell ? ' aktiv' : ''}" data-stichwort="${esc(g.anzeige)}">${esc(g.anzeige)}</button>`
-  ).join('');
-
-  $('#stichwort-liste').innerHTML = alleStichwoerter(store.daten)
-    .map((w) => `<option value="${esc(w)}">`).join('');
-
-  $('#notwendigkeit-skala').innerHTML = STUFEN.map((s) =>
-    `<button type="button" class="skala-stufe${s.wert === ui.notwendigkeit ? ' aktiv' : ''}"
-       style="--stufe:var(${s.token})" data-stufe="${s.wert}" title="${esc(s.hinweis)}">
-       <span class="skala-punkt"></span><span>${esc(s.kurz)}</span>
-     </button>`).join('');
-
-  $('#notwendigkeit-hint').textContent = ui.notwendigkeit === null
-    ? 'bitte wählen' : stufe(ui.notwendigkeit).hinweis;
-
   const a = monatsAuswertung(store.daten, ui.monat);
   const heuteCent = (store.daten.ausgaben || [])
     .filter((x) => x.datum === heute())
@@ -282,7 +255,7 @@ function erfassenZeichnen() {
        <span>${esc(monatLabel(ui.monat))} <strong>${eur(a.gesamt)}</strong></span>`
     : `<span>Heute <strong>${eur(heuteCent)}</strong></span>
        <span>${esc(monatLabel(ui.monat))} <strong>${eur(a.gesamt)}</strong></span>
-       <span>unn\u00f6tig <strong style="color:var(${a.unnoetig > 0 ? '--kritisch' : '--text'})">${eurKurz(a.unnoetig)}</strong></span>`;
+       <span>variabel <strong>${eurKurz(a.variabel)}</strong></span>`;
 
   $('#zuletzt').innerHTML = zuletztHtml();
   bannerZeichnen();
@@ -305,7 +278,7 @@ function eintragHtml(p) {
   const s = istEinnahme ? null : stufe(p.notwendigkeit);
   const meta = istEinnahme
     ? [datumLesbar(p.datum), p.quelle]
-    : [datumLesbar(p.datum), s.kurz, p.stichwort];
+    : [datumLesbar(p.datum), istFix(p.notwendigkeit) ? 'Fixkosten' : null];
 
   return `<div class="eintrag">
     <span class="eintrag-balken" style="--stufe:var(${istEinnahme ? '--gut' : s.token})"></span>
@@ -333,10 +306,9 @@ function bannerZeichnen() {
     ? `<div class="banner">
         <div class="banner-text">
           <strong>${esc(monatLabel(vormonat))} ist abgeschlossen.</strong>
-          ${eur(v.unnoetig)} unnötig bei ${eur(v.gesamt)} Ausgaben.
+          ${eur(v.variabel)} variabel bei ${eur(v.gesamt)} Ausgaben, ${eur(v.saldo)} Saldo.
         </div>
         <div class="banner-aktionen">
-          <button type="button" class="btn-ghost" data-banner="vergleich">Vergleich ansehen</button>
           <button type="button" class="btn-ghost" data-banner="abschluss-ok">Ok</button>
         </div>
       </div>`
@@ -366,121 +338,6 @@ function bannerZeichnen() {
     : '';
 }
 
-/* ------------------------------------------------------------ Uebersicht */
-
-function uebersichtZeichnen() {
-  const a = monatsAuswertung(store.daten, ui.monat);
-
-  $('#kpis').innerHTML = `
-    ${kpi('€ unnötig', eurKurz(a.unnoetig), 'Impuls + Reue', a.unnoetig > 0)}
-    ${kpi('Ausgaben', eurKurz(a.gesamt), a.einkommen ? prozent(a.gesamt, a.einkommen) + ' des Einkommens' : monatLabel(a.monat))}
-    ${kpi('Unnötig-Quote', prozent(a.unnoetig, a.variabel), 'vom beeinflussbaren Teil')}
-    ${kpi('Saldo', (a.saldo >= 0 ? '+' : '') + eurKurz(a.saldo), a.einkommen ? 'Einnahmen minus Ausgaben' : 'kein Einkommen erfasst', a.saldo < 0)}
-  `;
-
-  $('#charts').innerHTML = hinweiseFuer(a)
-    + notwendigkeitsChart(a)
-    + kategorieChart(a)
-    + stichwortChart(a)
-    + reueChart(reueRanking(store.daten));
-}
-
-function kpi(label, wert, sub, alarm) {
-  return `<div class="kpi">
-    <span class="kpi-label">${esc(label)}</span>
-    <span class="kpi-wert${alarm ? ' alarm' : ''}">${esc(wert)}</span>
-    <span class="kpi-sub">${esc(sub)}</span>
-  </div>`;
-}
-
-/** Ein bis zwei konkrete Saetze statt eines Zahlenfriedhofs. */
-function hinweiseFuer(a) {
-  if (!a.gesamt) return '';
-  const zeilen = [];
-
-  const topKat = a.kategorien.filter((k) => k.unnoetig > 0).sort((x, y) => y.unnoetig - x.unnoetig)[0];
-  if (topKat) {
-    zeilen.push(`<strong>${esc(topKat.name)}</strong> ist dein größter Impuls-Posten: ${eur(topKat.unnoetig)} von ${eur(topKat.cent)}.`);
-  }
-
-  const topWort = a.stichwoerter.filter((w) => w.anzahl >= 2)[0];
-  if (topWort) {
-    zeilen.push(`<strong>${esc(topWort.anzeige)}</strong>: ${eur(topWort.cent)} in ${topWort.anzahl} Buchungen – im Schnitt ${eur(Math.round(topWort.cent / topWort.anzahl))} pro Mal.`);
-  }
-
-  if (!zeilen.length) return '';
-  return zeilen.slice(0, 2).map((t) =>
-    `<div class="hinweis-zeile" style="margin-top:10px"><span class="hinweis-icon">→</span><span>${t}</span></div>`
-  ).join('');
-}
-
-/* ------------------------------------------------------------- Vergleich */
-
-function vergleichZeichnen() {
-  const monate = erfassteMonate(store.daten);
-  const ziel = $('#vergleich-inhalt');
-
-  if (!monate.length) {
-    ziel.innerHTML = `<div class="card">
-      <h2>Noch nichts zu vergleichen</h2>
-      <p class="hilfe">Sobald der erste Monat erfasst ist, wird er zur Basis. Ab dem zweiten Monat siehst du hier, was besser und was schlechter geworden ist.</p>
-    </div>`;
-    return;
-  }
-
-  const v = vergleich(store.daten, ui.monat);
-  const vorHinweis = v.vorBaseline
-    ? `<div class="hinweis-zeile"><span class="hinweis-icon">\u2139</span><span>
-        ${esc(monatLabel(ui.monat))} liegt vor deinem Startmonat
-        <strong>${esc(monatLabel(v.basis))}</strong>. Es gibt also noch keine Basis zum Vergleichen.
-        Den Startmonat \u00e4nderst du unter Setup.</span></div>`
-    : '';
-
-  ziel.innerHTML = vorHinweis
-    + leitmetrikBlock(v)
-    + kennzahlenVergleich(v)
-    + deltaListe('Kategorien', v.kategorien, 'In diesem und im Vormonat nichts erfasst.')
-    + deltaListe('Stichwörter', v.stichwoerter, 'Noch keine Stichwörter vergeben.')
-    + verlaufChart(verlauf(store.daten, ui.monat, 6), ui.monat);
-}
-
-/* ------------------------------------------------------------------ Reue */
-
-function reueZeichnen() {
-  const alle = offeneReue(store.daten);
-  let offen = alle.filter((a) => !ui.zurueckgelegt.has(String(a.id)));
-  if (!offen.length && alle.length) { ui.zurueckgelegt.clear(); offen = alle; }
-  const ziel = $('#reue-inhalt');
-
-  if (!offen.length) {
-    ziel.innerHTML = `<div class="card">
-      <h2>Nichts zu bewerten</h2>
-      <p class="hilfe">Hier tauchen Ausgaben auf, sobald sie mindestens 7 Tage alt sind. Der Abstand ist Absicht: direkt nach dem Kauf fällt die Bewertung systematisch zu positiv aus.</p>
-    </div>
-    ${reueChart(reueRanking(store.daten))}`;
-    return;
-  }
-
-  const p = offen[0];
-  const cent = Math.round((Number(p.betrag) || 0) * 100);
-  const s = stufe(p.notwendigkeit);
-
-  ziel.innerHTML = `
-    <div class="reue-karte">
-      <div class="reue-wann">vor ${tageSeit(p.datum)} Tagen · ${esc(s.kurz)}</div>
-      <div class="reue-betrag">${eur(cent)}</div>
-      <div class="reue-wo">${esc(p.kategorie || 'Ohne Kategorie')}${p.stichwort ? ' – ' + esc(p.stichwort) : ''}</div>
-      <div class="reue-knoepfe">
-        ${URTEILE.map((u) => `<button type="button" class="reue-knopf" style="--urteil:var(${u.token})" data-urteil="${u.wert}" data-satz="${esc(p.id)}">
-          <span class="reue-icon">${u.icon}</span><span>${esc(u.label)}</span>
-        </button>`).join('')}
-      </div>
-      <button type="button" class="tabelle-umschalter" data-ueberspringen="${esc(p.id)}">später</button>
-    </div>
-    <div class="hinweis-zeile"><span class="hinweis-icon">\u{1F4CA}</span><span>Noch <strong>${offen.length}</strong> offen. Jede Bewertung schärft das Reue-Ranking.</span></div>
-    ${reueChart(reueRanking(store.daten))}`;
-}
-
 /* ----------------------------------------------------------------- Liste */
 
 function listeZeichnen() {
@@ -492,11 +349,12 @@ function listeZeichnen() {
     ...(store.daten.einnahmen || []).map((x) => ({ ...x, art: 'Einnahmen' }))
   ].filter((p) => monatVon(p.datum) === ui.monat);
 
-  if (filter === 'unnoetig')  posten = posten.filter((p) => p.art === 'Ausgaben' && (Number(p.notwendigkeit) || 0) >= UNNOETIG_AB);
+  if (filter === 'variabel')  posten = posten.filter((p) => p.art === 'Ausgaben' && !istFix(p.notwendigkeit));
+  if (filter === 'fix')       posten = posten.filter((p) => p.art === 'Ausgaben' && istFix(p.notwendigkeit));
   if (filter === 'einnahmen') posten = posten.filter((p) => p.art === 'Einnahmen');
 
   if (suche) {
-    posten = posten.filter((p) => [p.kategorie, p.stichwort, p.quelle]
+    posten = posten.filter((p) => [p.kategorie, p.quelle]
       .filter(Boolean).join(' ').toLowerCase().includes(suche));
   }
 
@@ -654,20 +512,25 @@ function autoBuchen() {
 
 function autoBuchenIntern(monat) {
   const posten = [];
+  // Ohne eigenes Merkmal je Vorlage dient Kategorie plus Betrag als
+  // Fingerabdruck. Zwei Fixkosten mit identischer Kategorie UND identischem
+  // Betrag waeren nicht unterscheidbar - dann wird eine davon uebersprungen.
+  const fingerabdruck = (kategorie, betrag) =>
+    String(kategorie) + '|' + Math.round((Number(betrag) || 0) * 100);
   const vorhandeneFix = new Set((store.daten.ausgaben || [])
-    .filter((a) => monatVon(a.datum) === monat && Number(a.notwendigkeit) === 0)
-    .map((a) => normStichwort(a.stichwort)));
+    .filter((a) => monatVon(a.datum) === monat && istFix(a.notwendigkeit))
+    .map((a) => fingerabdruck(a.kategorie, a.betrag)));
 
   for (const v of (store.daten.vorlagen || [])) {
     if (String(v.aktiv) === 'nein') continue;
-    if (vorhandeneFix.has(normStichwort(v.name))) continue;
+    if (vorhandeneFix.has(fingerabdruck(v.kategorie || 'Wohnen', v.betrag))) continue;
     const tag = Math.min(Math.max(Number(v.tag) || 1, 1), 28);
     const satz = {
       id: id(), erstellt: new Date().toISOString(),
       datum: monat + '-' + String(tag).padStart(2, '0'),
       betrag: Number(v.betrag) || 0,
       kategorie: v.kategorie || 'Wohnen',
-      notwendigkeit: 0, stichwort: v.name, reue: '', reueAm: ''
+      notwendigkeit: 0
     };
     store.ausgabeSpeichern(satz);
     posten.push({ blatt: 'Ausgaben', id: satz.id, cent: Math.round(satz.betrag * 100) });
@@ -717,12 +580,12 @@ function herunterladen(dateiname, inhalt, typ) {
 }
 
 function csvExport() {
-  const spalten = ['datum', 'betrag', 'kategorie', 'stichwort', 'notwendigkeit', 'stufe', 'reue'];
+  const spalten = ['datum', 'betrag', 'kategorie', 'art'];
   const zeilen = [spalten.join(';')];
   for (const a of store.daten.ausgaben || []) {
     zeilen.push([
       a.datum, String(Number(a.betrag) || 0).replace('.', ','),
-      a.kategorie, a.stichwort, a.notwendigkeit, stufe(a.notwendigkeit).name, a.reue
+      a.kategorie, stufe(a.notwendigkeit).name
     ].map((f) => `"${String(f == null ? '' : f).replace(/"/g, '""')}"`).join(';'));
   }
   herunterladen('ausgabenbro-' + heute() + '.csv', '﻿' + zeilen.join('\r\n'), 'text/csv');
@@ -780,7 +643,7 @@ const OB_SCHRITTE = [
   {
     titel: 'Fixkosten',
     render: () => `
-      <p class="hilfe">Alles, was jeden Monat gleich abgeht: Miete, Versicherungen, Abos, Handyvertrag. Wird automatisch als Stufe&nbsp;0 gebucht und aus der Unnötig-Quote herausgerechnet.</p>
+      <p class="hilfe">Alles, was jeden Monat gleich abgeht: Miete, Versicherungen, Abos, Handyvertrag. Wird zu Monatsbeginn automatisch gebucht und bleibt aus dem Tagesbudget heraus.</p>
       <div id="ob-vorlagen">${obVorlagenHtml()}</div>
       <div class="vorlage-form">
         <input type="text" id="ob-v-name" class="eingabe" placeholder="Bezeichnung">
@@ -814,7 +677,7 @@ const OB_SCHRITTE = [
       const fix = ob.vorlagen.reduce((s, v) => s + Math.round((Number(v.betrag) || 0) * 100), 0);
       const eink = ob.einkommen ? betragParsen(ob.einkommen) : 0;
       return `
-        <p class="hilfe">Das war's. Ab jetzt: Betrag, Kategorie, Stichwort, Notwendigkeit – vier Taps pro Ausgabe.</p>
+        <p class="hilfe">Das war's. Ab jetzt: Betrag eintippen, Kategorie antippen, speichern.</p>
         <div class="ob-zusammenfassung">
           <div><span>Einkommen</span><strong>${eink ? eur(eink) : '–'}</strong></div>
           <div><span>Fixkosten</span><strong>${ob.vorlagen.length} Posten, ${eur(fix)}</strong></div>
@@ -871,7 +734,8 @@ function onboardingAbschliessen() {
   const behalten = new Set();
 
   for (const v of ob.vorlagen) {
-    const treffer = vorhandene.find((x) => normStichwort(x.name) === normStichwort(v.name));
+    const schluessel = (t) => String(t || '').trim().toLowerCase();
+    const treffer = vorhandene.find((x) => schluessel(x.name) === schluessel(v.name));
     const satz = {
       id: treffer ? treffer.id : id(),
       name: v.name, betrag: Number(v.betrag) || 0,
@@ -951,11 +815,6 @@ function onboardingVerdrahten() {
   });
 }
 
-function analyseSetzen(welche) {
-  ui.analyse = welche;
-  $$('#analyse-schalter button').forEach((x) => x.classList.toggle('aktiv', x.dataset.analyse === welche));
-}
-
 /* ========================================================= Verdrahtung */
 
 function verdrahten() {
@@ -986,47 +845,23 @@ function verdrahten() {
     erfassenZeichnen();
   });
 
-  $('#stichwort-chips').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-stichwort]');
-    if (!b) return;
-    const feld = $('#stichwort');
-    feld.value = normStichwort(feld.value) === normStichwort(b.dataset.stichwort) ? '' : b.dataset.stichwort;
-    erfassenZeichnen();
-  });
-  $('#stichwort').addEventListener('input', () => {
-    const aktuell = normStichwort($('#stichwort').value);
-    $$('#stichwort-chips .chip').forEach((c) =>
-      c.classList.toggle('aktiv', normStichwort(c.dataset.stichwort) === aktuell));
-  });
-
-  $('#notwendigkeit-skala').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-stufe]');
-    if (!b) return;
-    ui.notwendigkeit = Number(b.dataset.stufe);
-    erfassenZeichnen();
-  });
-
   $('#form-ausgabe').addEventListener('submit', (e) => {
     e.preventDefault();
     const cent = betragParsen($('#betrag').value);
     if (!Number.isFinite(cent) || cent <= 0) { toast('Bitte einen Betrag eingeben.', true); $('#betrag').focus(); return; }
     if (!ui.kategorie) { toast('Bitte eine Kategorie wählen.', true); return; }
-    if (ui.notwendigkeit === null) { toast('Bitte die Notwendigkeit wählen – das ist der Kern der Auswertung.', true); return; }
 
     const datum = $('#datum').value || heute();
     store.ausgabeSpeichern({
       id: id(), erstellt: new Date().toISOString(), datum,
       betrag: zuEuro(cent),
       kategorie: ui.kategorie,
-      notwendigkeit: ui.notwendigkeit,
-      stichwort: $('#stichwort').value.trim(),
-      reue: '', reueAm: ''
+      notwendigkeit: $('#ist-fix').checked ? 0 : 1
     });
 
     if (monatVon(datum) !== ui.monat) ui.monat = monatVon(datum);
     $('#betrag').value = '';
-    $('#stichwort').value = '';
-    ui.notwendigkeit = null;
+    $('#ist-fix').checked = false;
     toast(eur(cent) + ' erfasst.');
     $('#betrag').focus();
     zeichnen();
@@ -1054,16 +889,6 @@ function verdrahten() {
     const weg = e.target.closest('[data-loeschen]');
     if (weg) { store.loeschen(weg.dataset.blatt, weg.dataset.loeschen); toast('Gelöscht.'); zeichnen(); return; }
 
-    const urteil = e.target.closest('[data-urteil]');
-    if (urteil) {
-      const satz = (store.daten.ausgaben || []).find((a) => String(a.id) === urteil.dataset.satz);
-      if (satz) { store.ausgabeSpeichern({ ...satz, reue: urteil.dataset.urteil, reueAm: heute() }); zeichnen(); }
-      return;
-    }
-
-    const spaeter = e.target.closest('[data-ueberspringen]');
-    if (spaeter) { ui.zurueckgelegt.add(spaeter.dataset.ueberspringen); reueZeichnen(); return; }
-
     const topfWeg = e.target.closest('[data-topf-weg]');
     if (topfWeg) {
       const liste = topfDefinition(store.daten);
@@ -1084,23 +909,10 @@ function verdrahten() {
     const banner = e.target.closest('[data-banner]');
     if (banner) {
       const was = banner.dataset.banner;
-      if (was === 'vergleich') {
-        store.configSchreiben('abschlussGesehen', monatVon(heute()));
-        ui.monat = monatVerschieben(monatVon(heute()), -1);
-        analyseSetzen('vergleich');
-        ansichtSetzen('analyse');
-      }
       if (was === 'abschluss-ok') { store.configSchreiben('abschlussGesehen', monatVon(heute())); zeichnen(); }
       if (was === 'auto-undo') { autoRueckgaengig(); zeichnen(); }
       if (was === 'auto-ok') { schreiben(LS_AUTO, null); zeichnen(); }
     }
-  });
-
-  $('#analyse-schalter').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-analyse]');
-    if (!btn) return;
-    analyseSetzen(btn.dataset.analyse);
-    zeichnen();
   });
 
   // Kategorie-Auswahl im Topf-Formular

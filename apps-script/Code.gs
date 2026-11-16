@@ -20,14 +20,17 @@
 var TOKEN_PROP = 'AUSGABENBRO_TOKEN';
 
 var SCHEMA = {
-  Ausgaben:  ['id', 'erstellt', 'datum', 'betrag', 'kategorie', 'notwendigkeit',
-              'stichwort', 'reue', 'reueAm'],
+  // notwendigkeit: 0 = Fixkosten, 1 = variable Ausgabe.
+  // Aeltere Zeilen koennen 2-4 enthalten (frueher feinere Abstufung) und
+  // zaehlen wie 1. Die frueheren Spalten stichwort/reue/reueAm bleiben in
+  // bestehenden Tabellen stehen, werden aber nicht mehr gelesen.
+  Ausgaben:  ['id', 'erstellt', 'datum', 'betrag', 'kategorie', 'notwendigkeit'],
   Einnahmen: ['id', 'erstellt', 'datum', 'betrag', 'quelle', 'notiz'],
   Vorlagen:  ['id', 'name', 'betrag', 'kategorie', 'tag', 'aktiv', 'zuletzt'],
   Config:    ['key', 'value']
 };
 
-var TEXT_SPALTEN = ['id', 'erstellt', 'datum', 'reueAm', 'zuletzt'];
+var TEXT_SPALTEN = ['id', 'erstellt', 'datum', 'zuletzt'];
 
 // ---------------------------------------------------------------- Einstieg
 
