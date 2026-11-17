@@ -1,0 +1,140 @@
+/* Gemeinsames Seitenraster aus Figma 1:2 und 11:46:
+   pt 32, px 28, Abstand 20 zwischen den Bloecken. Unten Platz fuer
+   Tab-Leiste und FAB (Figma 11:46: pb 170 bei 34 px Home-Indikator). */
+.seite {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100dvh;
+  padding: calc(var(--page-top) + var(--safe-top)) var(--page-x)
+    calc(var(--tabbar-h) + var(--safe-bottom) + var(--fab-gap) + 46px + 25px);
+}
+
+.kopfbereich {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Figma 2:17: Manjari 22, zweite Zeile blau. */
+.gruss {
+  font-size: 22px;
+  line-height: normal;
+  padding-right: 36px;
+}
+
+.gruss .unter {
+  display: block;
+  color: var(--c-accent);
+}
+
+.zahnrad {
+  position: absolute;
+  top: 2px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--c-inactive);
+}
+
+.zahnrad::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.zurueck {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: flex-start;
+  margin-left: -6px;
+  color: var(--c-accent);
+  font-size: 15px;
+  line-height: normal;
+}
+
+.zurueck::before {
+  content: '';
+  position: absolute;
+  inset: -12px -8px;
+}
+
+/* Figma 2:32: Manjari 17. */
+.abschnitt {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.abschnittTitel {
+  font-size: 17px;
+  line-height: 19px; /* Figma 2:32: Textbox 19 px */
+}
+
+/* Figma 4:52: Label-Zeile ueber einer Karte, Abstand 4. */
+.gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gruppeLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 14px;
+  font-size: 11px;
+  line-height: 11px;
+}
+
+.gruppeLabel > span {
+  transform: translateY(1px);
+}
+
+/* Kopfzeile einer Betragskarte: px 10, py 5. */
+.kartenKopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 10px;
+}
+
+/* Rechte Meta-Spalte: zwei Zeilen zu je 16 px, blau, rechtsbuendig. */
+.meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  color: var(--c-accent);
+  font-size: 12px;
+  text-align: right;
+}
+
+.meta > p {
+  height: 16px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.zahl,
+.zahl * {
+  font-family: var(--f-num);
+  letter-spacing: var(--ls-num);
+}
+
+.minus {
+  color: var(--c-minus);
+}
+
+.leer {
+  padding: 16px 10px;
+  color: var(--c-text-2);
+  font-size: 14px;
+  line-height: 1.4;
+}

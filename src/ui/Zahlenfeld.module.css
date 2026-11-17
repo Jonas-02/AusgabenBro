@@ -37,6 +37,10 @@
 }
 
 /* Figma 10:56: bg #1E1E1E, px 12, py 8, Momo 14. */
+.schnell * {
+  letter-spacing: var(--ls-num);
+}
+
 .schnell {
   position: relative;
   padding: 8px 12px;

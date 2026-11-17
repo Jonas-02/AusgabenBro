@@ -1,4 +1,5 @@
-.betrag {
+.betrag,
+.betrag * {
   font-family: var(--f-num);
   letter-spacing: var(--ls-num);
   line-height: normal;

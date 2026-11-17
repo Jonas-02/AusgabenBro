@@ -11,10 +11,17 @@ body {
   background: var(--c-bg);
   color: var(--c-text);
   font-family: var(--f-text);
-  letter-spacing: var(--ls-text);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Laufweite an JEDEM Element relativ zu dessen eigener Schriftgroesse.
+   Am body gesetzt wuerde -0.07em einmal bei 16 px zu -1,12 px berechnet und
+   als fester Wert vererbt: ein 12-px-Text bekaeme -9,3 % statt -7 %.
+   :where() haelt die Spezifitaet bei 0, Komponenten ueberschreiben leicht. */
+:where(*) {
+  letter-spacing: var(--ls-text);
 }
 
 body {
@@ -30,7 +37,6 @@ html.sheet-offen body {
 
 button {
   font: inherit;
-  letter-spacing: inherit;
   color: inherit;
   background: none;
   border: 0;
@@ -45,7 +51,6 @@ input,
 select,
 textarea {
   font: inherit;
-  letter-spacing: inherit;
   color: inherit;
 }
 
@@ -62,9 +67,20 @@ h3 {
   outline-offset: 2px;
 }
 
-.num {
+.num,
+.num * {
   font-family: var(--f-num);
   letter-spacing: var(--ls-num);
+}
+
+/* CSS setzt die Laufweite auch hinter das letzte Zeichen, Figma nicht.
+   Wo die Breite einer Textbox zaehlt, wird das ausgeglichen. */
+.ende-text {
+  margin-right: calc(-1 * var(--ls-text));
+}
+
+.ende-num {
+  margin-right: calc(-1 * var(--ls-num));
 }
 
 .nur-screenreader {

@@ -57,7 +57,7 @@ export function Schnellbetrag({ cent, onClick }: SchnellProps) {
   const euro = cent / 100;
   return (
     <button type="button" className={styles.schnell} onClick={onClick} aria-label={`plus ${euro} Euro`}>
-      +{euro}&nbsp;€
+      <span className="ende-num">+{euro}&nbsp;€</span>
     </button>
   );
 }

@@ -3,10 +3,10 @@ import styles from './Karte.module.css';
 
 interface Props {
   children: ReactNode;
-  className?: string;
+  className?: string | undefined;
   /** Macht die ganze Karte antippbar. */
-  onClick?: () => void;
-  label?: string;
+  onClick?: (() => void) | undefined;
+  label?: string | undefined;
 }
 
 export function Karte({ children, className, onClick, label }: Props) {

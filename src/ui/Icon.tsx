@@ -14,9 +14,9 @@ export type SymbolName = (typeof WAEHLBARE_ICONS)[number];
 interface Props {
   name: IconName;
   /** Ueberschreibt die native Groesse aus Figma. Nur fuer abgeleitete Screens. */
-  groesse?: number;
-  drehung?: number;
-  className?: string;
+  groesse?: number | undefined;
+  drehung?: number | undefined;
+  className?: string | undefined;
 }
 
 export function Icon({ name, groesse, drehung, className }: Props) {

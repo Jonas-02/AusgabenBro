@@ -1,0 +1,172 @@
+/* Figma 7:102 "Betrag": Eingabezeile und Schnellbetraege, Abstand 10. */
+.betragBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Figma 7:103: Ziffern, Cursor 2x44, "€" in 35 %, Abstand 6. */
+.eingabe * {
+  letter-spacing: var(--ls-num);
+}
+
+.eingabe {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 73px; /* Figma 7:103; Chromium rechnet Momo 56 "normal" auf 72 */
+  font-family: var(--f-num);
+  font-size: 56px;
+  letter-spacing: var(--ls-num);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.ziffern {
+  color: var(--c-text);
+}
+
+/* Leere Eingabe: "0" als Platzhalter in 35 % (abgeleitet). */
+.leer {
+  color: var(--c-text-35);
+}
+
+.cursor {
+  flex: none;
+  width: 2px;
+  height: 44px;
+  background: var(--c-accent);
+  animation: blinken 1.1s steps(1) infinite;
+}
+
+.waehrung {
+  color: var(--c-text-35);
+}
+
+@keyframes blinken {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}
+
+.schnell {
+  display: flex;
+  gap: 8px;
+}
+
+/* Figma 7:108 "Pot-Auswahl": Abstand 8. */
+.potWahl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.frage {
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Figma 7:139 "Auswirkung auf Pot": bg #1E1E1E, p 12, Abstand 8. */
+.auswirkung {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+}
+
+.kopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.danach {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nachher {
+  font-family: var(--f-num);
+  font-size: 25px;
+  letter-spacing: var(--ls-num);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.vorher {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  color: var(--c-accent);
+  font-size: 12px;
+  line-height: normal;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Feste Hoehe 16 px wie Figma 10:76, damit das Sheet nicht springt. */
+.status {
+  height: 16px;
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.statusMinus {
+  color: var(--c-minus);
+}
+
+/* Figma 7:196: h 52, bg Akzent, Manjari 17 in #1E1E1E. */
+.cta {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 52px;
+  border-radius: var(--r-card);
+  background: var(--c-accent);
+  color: var(--c-bg);
+  font-size: 17px;
+  line-height: normal;
+  transition: filter 120ms;
+}
+
+.cta:active {
+  filter: brightness(0.92);
+}
+
+.cta > span {
+  transform: translateY(1px);
+}
+
+/* Abgeleitet: Loeschen als Text in Orange. */
+.loeschen {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 16px;
+  color: var(--c-minus);
+  font-size: 15px;
+  line-height: normal;
+}

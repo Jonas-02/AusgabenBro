@@ -11,7 +11,7 @@ interface Props extends FormatOptionen {
    * Betrag korrekt formatiert und der Abstand per CSS nachgebildet.
    */
   kommaLuft?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 /**

@@ -1,0 +1,26 @@
+/* Figma 1:4: Karte mit Abstand 10, darin Kopfzeile und Verlauf (Abstand 12). */
+.hauptkarte,
+.potkarte {
+  gap: 10px;
+}
+
+.verlauf {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Figma 2:11: Manjari 12, Zahlen in Momo, zweite Zahl blau.
+   Feste Hoehe: Manjari und Momo haben verschiedene Ober- und Unterlaengen,
+   gemischt wuerde die Zeilenbox sonst auf 18 statt 16 px wachsen. */
+.satz {
+  height: 16px;
+  padding: 0 10px;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.blau {
+  color: var(--c-accent);
+}

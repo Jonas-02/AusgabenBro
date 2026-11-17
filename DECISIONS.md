@@ -112,3 +112,38 @@ derselbe Zusatz, damit eine jährliche Abbuchung nicht unbemerkt kommt.
 +5 / +10 / +20 € behalten die Zahl der getippten Nachkommastellen bei:
 „12,5" → „22,5", „12,50" → „32,50". Überschreitet das Ergebnis 99.999,99 €,
 passiert nichts.
+
+## Typografie im Browser
+
+### Laufweite pro Element
+`letter-spacing: -0.07em` am `body` würde einmal bei 16 px zu −1,12 px
+ausgerechnet und als fester Wert vererbt; ein 12-px-Text bekäme −9,3 % statt
+−7 %. Die Laufweite wird deshalb über `:where(*)` an jedem Element relativ zu
+dessen eigener Schriftgröße berechnet. Elemente in Momo geben ihren Wert an
+Kind-Elemente weiter.
+
+### Nachlaufende Laufweite
+CSS setzt die Laufweite auch hinter das letzte Zeichen, Figma nicht. Bei
+Momo 14 px sind das 1,82 px pro Textbox. Wo die Breite einer Box zählt
+(Chips, Schnellbeträge, FAB, Betrag vor dem Cursor), wird das mit
+`.ende-text` / `.ende-num` ausgeglichen.
+
+### Gemischte Schriften in einer Zeile
+Manjari und Momo haben unterschiedliche Ober- und Unterlängen. In einer
+gemischten Zeile („du hast 380,32 € von 425 € ausgegeben") wächst die
+Zeilenbox dadurch auf 18 statt 16 px. Solche Zeilen haben eine feste Höhe.
+
+### Textbreiten
+Die Abnahme in `e2e/masse.spec.ts` prüft Positionen und Höhen auf 1 px.
+Breiten von Textboxen (Chips, Schnellbeträge, FAB) dürfen bis 3 px abweichen:
+Browser und Figma messen Glyphen minimal unterschiedlich, das lässt sich nicht
+für alle Zeichenfolgen gleichzeitig ausgleichen.
+
+### Leere Betragseingabe
+Ohne Eingabe zeigt das Ausgaben-Sheet eine „0" in 35 % Deckkraft vor dem
+Cursor. Nicht im Figma; ohne Platzhalter stünde nur „| €".
+
+### Hinweis „Betrag eingeben"
+Ein Toast außerhalb des `<dialog>` liegt unter dem Top Layer und wäre nicht
+sichtbar. Der Hinweis erscheint deshalb 1,6 Sekunden lang als Beschriftung
+des Speichern-Buttons. Die Höhe des Sheets bleibt dabei gleich.

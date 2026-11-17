@@ -12,7 +12,7 @@ const FARBE: Record<SegmentArt, string> = {
 interface Props {
   daten: BalkenDaten;
   hoehe: 28 | 12;
-  className?: string;
+  className?: string | undefined;
 }
 
 /** Gesamtbreite entspricht `daten.skala`; ungenutzter Rest bleibt leer. */

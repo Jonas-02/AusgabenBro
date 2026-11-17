@@ -4,7 +4,7 @@ import styles from './Chip.module.css';
 interface Props {
   label: string;
   aktiv?: boolean;
-  icon?: IconName;
+  icon?: IconName | undefined;
   /** "Neue Kategorie": grauer Text, kein Auswahlzustand. */
   gedimmt?: boolean;
   onClick: () => void;
@@ -23,7 +23,7 @@ export function Chip({ label, aktiv = false, icon, gedimmt = false, onClick, aus
       onClick={onClick}
     >
       {icon && <Icon name={icon} />}
-      <span className={styles.label}>{label}</span>
+      <span className={`${styles.label} ende-text`}>{label}</span>
     </button>
   );
 }
