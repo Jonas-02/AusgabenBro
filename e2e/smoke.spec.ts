@@ -37,7 +37,18 @@ test('keine Scrollbalken, Scrollen geht trotzdem', async ({ page }) => {
   await page.goto('./#/fixkosten');
   const seite = await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarWidth);
   expect(seite).toBe('none');
-  await page.mouse.wheel(0, 400);
+  // Ohne Mausrad: mobiles WebKit in Playwright kennt keins. Scrollen darf
+  // nicht per CSS gesperrt sein, die Seite ist laenger als der Bildschirm,
+  // und ein Scrollbefehl bewegt sie.
+  const zustand = await page.evaluate(() => ({
+    html: getComputedStyle(document.documentElement).overflowY,
+    body: getComputedStyle(document.body).overflowY,
+    laenger: document.documentElement.scrollHeight > window.innerHeight
+  }));
+  expect(zustand.html).not.toBe('hidden');
+  expect(zustand.body).not.toBe('hidden');
+  expect(zustand.laenger).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 400));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
 
   await page.getByRole('button', { name: 'Fixkosten hinzufügen' }).click();
