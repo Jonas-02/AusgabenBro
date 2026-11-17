@@ -95,3 +95,30 @@ export async function vorbereiten(page: Page, { daten = figmaDaten(), homeIndika
 export async function schriftenBereit(page: Page) {
   await page.evaluate(() => document.fonts.ready);
 }
+
+/**
+ * Drei Monate Ausgaben (1.9.–17.11.2026) mit festem Zufall, fuer die
+ * Analyse-Seite. Gleiche Pots und Fixkosten wie figmaDaten.
+ */
+export function verlaufDaten() {
+  const basis = figmaDaten();
+  let saat = 42;
+  const zufall = () => {
+    saat = (saat * 1_103_515_245 + 12_345) % 2_147_483_648;
+    return saat / 2_147_483_648;
+  };
+  const pots = basis.pots.map((p) => ({ ...p, erstelltAm: '2026-09-01', betraege: [{ ab: '2026-09-01', cent: p.betraege[0]!.cent }] }));
+  const ausgaben: { id: string; potId: string; cent: number; datum: string; erfasstUm: string }[] = [];
+  const start = Date.UTC(2026, 8, 1);
+  const ende = Date.UTC(2026, 10, 17);
+  for (let t = start, n = 0; t <= ende; t += 86_400_000) {
+    const tag = new Date(t).toISOString().slice(0, 10);
+    const wochenende = [0, 5, 6].includes(new Date(t).getUTCDay());
+    const anzahl = zufall() < 0.3 ? 0 : wochenende ? 2 : 1;
+    for (let i = 0; i < anzahl; i++) {
+      const pot = pots[Math.floor(zufall() * pots.length)]!;
+      ausgaben.push({ id: `v${n++}`, potId: pot.id, cent: Math.round(400 + zufall() * (wochenende ? 3_800 : 1_800)), datum: tag, erfasstUm: `${tag}T12:00:00Z` });
+    }
+  }
+  return { ...basis, pots, ausgaben };
+}

@@ -428,7 +428,8 @@ test.describe('Große Schrift', () => {
     ['Dashboard', './#/budget'],
     ['Fixkosten', './#/fixkosten'],
     ['Pot-Verlauf', './#/pot/drogen'],
-    ['Einstellungen', './#/einstellungen']
+    ['Einstellungen', './#/einstellungen'],
+    ['Analyse', './#/analyse']
   ] as const) {
     test(`${name}: nichts ragt seitlich heraus`, async ({ page }) => {
       await vorbereiten(page);
@@ -499,6 +500,58 @@ test.describe('Tagesspruch', () => {
     await page.getByRole('button', { name: 'Weiter' }).click();
     await page.getByRole('button', { name: 'Los geht’s' }).click();
     await expect(unterzeile(page)).toHaveText(spruchAm('2026-11-17'));
+  });
+});
+
+test.describe('Analyse', () => {
+  test('Tab öffnet die Analyse mit Hochrechnung und Spielraum', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/budget');
+    const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    await nav.getByRole('link', { name: 'Analyse' }).click();
+    await expect(nav.getByRole('link', { name: 'Analyse' })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Tag 17 von 30');
+
+    // 383,70 € in 17 Tagen → 677,12 € bis 30.11.; 750 € Budget
+    const karte = page.locator('section[aria-labelledby="prognose-titel"]');
+    await expect(karte.locator('.nur-screenreader').first()).toHaveText('677,12 €');
+    await expect(karte).toContainText('72,88 € übrig');
+    await expect(karte).toContainText('höchstens 26,16 € am Tag');
+    await expect(page.getByRole('button', { name: 'Ausgabe hinzufügen' })).toBeVisible();
+  });
+
+  test('Werte per Tastatur und als Tabelle', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/analyse');
+    const diagramm = page.getByRole('img', { name: /Ausgaben pro Tag/ });
+    await diagramm.focus();
+    await page.keyboard.press('Home');
+    for (let i = 0; i < 9; i++) await page.keyboard.press('ArrowRight');
+    const live = page.locator('section[aria-labelledby="protag-titel"] [aria-live="polite"]');
+    await expect(live).toHaveText('Di., 10. Nov.: ausgegeben, drüber 383,70 €, Tagesbudget 25 €');
+    await page.keyboard.press('Escape');
+    await expect(live).toHaveText('');
+
+    const abschnitt = page.locator('section[aria-labelledby="protag-titel"]');
+    await abschnitt.getByText('Werte als Tabelle').click();
+    await expect(abschnitt.getByRole('row', { name: /10\. Nov\./ })).toContainText('383,70 € (drüber)');
+  });
+
+  test('Kennzahlen, Verteilung und anstehende Fixkosten', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/analyse');
+    const kennzahlen = page.locator('section[aria-labelledby="kennzahlen-titel"]');
+    await expect(kennzahlen).toContainText('Tage ohne Ausgabe15von 16 Tagen');
+    await expect(kennzahlen).toContainText('größte Ausgabe121,23 €Sonstiges und Ausgehen · 10.11.');
+
+    const verteilung = page.locator('section[aria-labelledby="verteilung-titel"] li');
+    await expect(verteilung.first()).toContainText('Sonstiges und Ausgehen');
+    await expect(verteilung.first()).toContainText('32 %');
+
+    const kosten = page.locator('section[aria-labelledby="kosten-titel"]');
+    await expect(kosten.locator('.nur-screenreader').first()).toHaveText('1.596,18 €');
+    await expect(kosten.locator('[class*="_posten_"]').first()).toContainText('Internet');
+    await expect(kosten.locator('[class*="_posten_"]').first()).toContainText('in 3 Tagen');
   });
 });
 

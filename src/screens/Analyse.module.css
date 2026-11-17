@@ -1,0 +1,182 @@
+/* Abgeleitet: Karten wie Dashboard 1:2 (Kopf p 5/10, Abstand 10). */
+.diagrammKarte {
+  gap: 10px;
+  padding-bottom: 4px;
+}
+
+.oben {
+  padding-top: 10px;
+}
+
+.innen {
+  padding: 0 10px;
+}
+
+.heldBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Wie "danach in …" im Ausgaben-Sheet: Manjari 12 in 60 %. */
+.label {
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Satz wie in der Hauptkarte; darf hier umbrechen. */
+.satz {
+  height: auto;
+}
+
+.satzFrei {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.stark {
+  font-weight: 400;
+  color: var(--c-accent);
+}
+
+.hinweis {
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Kennzahlen: 2 × 2 Kacheln */
+.kacheln {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.kachel {
+  gap: 2px;
+  padding: 10px;
+}
+
+.kachelWert {
+  font-family: var(--f-num);
+  font-size: 25px;
+  letter-spacing: var(--ls-num);
+  line-height: 30px;
+}
+
+.kachelUnter {
+  color: var(--c-text-2);
+  font-size: 11px;
+  line-height: 14px;
+  overflow-wrap: break-word;
+}
+
+.fussnote {
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Rangliste der Pots: Name, Wert, Balken 8 px, eckig an der Grundlinie. */
+.listeKarte {
+  gap: 12px;
+  padding: 10px;
+}
+
+.balkenListe {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.balkenKopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.balkenName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.balkenWert {
+  flex: none;
+  white-space: nowrap;
+}
+
+.anteil {
+  color: var(--c-text-2);
+}
+
+.balkenSpur {
+  height: 8px;
+}
+
+.balken {
+  height: 8px;
+  border-radius: 0 4px 4px 0;
+  background: var(--c-accent);
+}
+
+/* Duenner geteilter Balken: 8 px, Enden rund, 2 px Luft zwischen den Teilen. */
+.segmente {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+}
+
+.segmente > div {
+  flex-basis: 0;
+  min-width: 4px;
+  border-radius: 4px;
+}
+
+.kostenListe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.kostenListe li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kostenListe li > span:nth-child(2) {
+  flex: 1;
+  color: var(--c-text-2);
+}
+
+.unterTitel {
+  margin-top: 4px;
+  color: var(--c-text-2);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+/* Listenzeilen hier nur zum Lesen, nicht antippbar. */
+.zeile {
+  cursor: default;
+}
+
+.zeile:active {
+  filter: none;
+}

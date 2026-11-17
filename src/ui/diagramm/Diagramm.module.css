@@ -1,0 +1,186 @@
+/* Diagramme: abgeleitet (nicht im Figma). Farben nur aus den Tokens:
+   Akzent = ausgegeben, Hellgrau = Budget/zugeflossen, Orange = drueber.
+   Linien 2 px, Saeulen max. 24 px mit 4 px Radius am Datenende,
+   Gitter als Haarlinie knapp ueber der Kartenfarbe. */
+
+.halter {
+  position: relative;
+  width: 100%;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.svg:focus {
+  outline: none;
+}
+
+.svg:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.gitter {
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.basis {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.achse {
+  fill: var(--c-text-2);
+  font-family: var(--f-num);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.achseText {
+  fill: var(--c-text-2);
+  font-family: var(--f-text);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.referenz {
+  stroke: var(--c-light);
+  stroke-width: 1;
+  opacity: 0.8;
+  shape-rendering: crispEdges;
+}
+
+.fadenkreuz {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+/* Anzeige beim Antippen: Wert vorne und kraeftig, Name dahinter leise. */
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  min-width: 120px;
+  padding: 8px 10px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  box-shadow: 0 4px 12px var(--c-shadow-fab);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.tooltipTitel {
+  margin-bottom: 4px;
+  color: var(--c-text-2);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.tooltipZeile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--c-text-2);
+}
+
+.tooltipWert {
+  color: var(--c-text);
+  font-family: var(--f-num);
+  font-size: 14px;
+  letter-spacing: var(--ls-num);
+}
+
+/* Legende: Linien-Schluessel fuer Linien, Flaechen fuer Saeulen. */
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--c-text-2);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.legende li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.schluessel {
+  flex: none;
+  display: inline-block;
+}
+
+/* Tabellenansicht: dieselben Werte ohne Grafik, fuer Screenreader und zum Nachlesen. */
+.tabelle {
+  font-size: 12px;
+}
+
+.tabelle summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: var(--c-accent);
+  cursor: pointer;
+  list-style: none;
+}
+
+.tabelle summary::-webkit-details-marker {
+  display: none;
+}
+
+.tabelle summary::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.tabelle[open] summary::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+
+.tabelle table {
+  width: 100%;
+  margin-top: 4px;
+  border-collapse: collapse;
+}
+
+.tabelle th,
+.tabelle td {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--c-bg);
+  text-align: left;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.tabelle th {
+  color: var(--c-text-2);
+}
+
+.tabelle td + td,
+.tabelle th + th {
+  padding-left: 8px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

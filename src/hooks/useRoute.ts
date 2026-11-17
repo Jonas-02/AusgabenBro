@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 export type Route =
   | { seite: 'budget' }
   | { seite: 'fixkosten' }
+  | { seite: 'analyse' }
   | { seite: 'pot'; id: string }
   | { seite: 'einstellungen' };
 
@@ -15,6 +16,8 @@ export function leseRoute(hash: string): Route {
   switch (teile[0]) {
     case 'fixkosten':
       return { seite: 'fixkosten' };
+    case 'analyse':
+      return { seite: 'analyse' };
     case 'pot':
       return teile[1] ? { seite: 'pot', id: decodeURIComponent(teile[1]) } : { seite: 'budget' };
     case 'einstellungen':

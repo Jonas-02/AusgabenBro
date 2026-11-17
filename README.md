@@ -6,6 +6,10 @@ Monat) füllt sich jeden Tag ein Stück. Du siehst also nicht, was vom Monat
 zeigt die App, wann der Pot wieder im Plus ist. Fixkosten laufen getrennt
 davon.
 
+Der Tab **Analyse** zeigt, ob das Budget bis zum Zahltag reicht
+(Hochrechnung und erlaubter Betrag pro Tag), Ausgaben pro Tag, Wochentag und
+Monat, wohin das Geld geht und was ein Monat inklusive Fixkosten kostet.
+
 Unter der Begrüßung steht jeden Tag ein neuer Spruch, der dich fürs
 Geldausgeben auslacht. Wer's netter mag, schaltet in den Einstellungen auf
 ein eigenes Motto um.

@@ -1,5 +1,5 @@
 import { test, type Page } from '@playwright/test';
-import { schriftenBereit, vorbereiten } from './hilfen';
+import { schriftenBereit, verlaufDaten, vorbereiten } from './hilfen';
 
 /**
  * Screenshots aller Screens und Zustaende bei 393x852 fuer den Vergleich mit
@@ -110,7 +110,8 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
         ['dashboard', './#/budget'],
         ['fixkosten', './#/fixkosten'],
         ['pot-verlauf', './#/pot/drogen'],
-        ['einstellungen', './#/einstellungen']
+        ['einstellungen', './#/einstellungen'],
+        ['analyse', './#/analyse']
       ] as const) {
         await page.goto(ziel);
         await schriftenBereit(page);
@@ -125,4 +126,24 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
       await foto(page, info.project.name, 'gross_ausgabe-sheet-unten');
     });
   });
+
+  test.describe('Analyse', () => {
+    test('Analyse mit drei Monaten Daten', async ({ page }, info) => {
+      await vorbereiten(page, { daten: verlaufDaten() });
+      await page.goto('./#/analyse');
+      await schriftenBereit(page);
+      await page.screenshot({ path: `${ORDNER}/${info.project.name}/abgeleitet_analyse.png`, fullPage: true, animations: 'disabled' });
+      // Antippen zeigt den Wert eines Tages
+      await page.getByRole('img', { name: /Ausgaben pro Tag/ }).click({ position: { x: 200, y: 60 } });
+      await foto(page, info.project.name, 'abgeleitet_analyse-antippen');
+    });
+
+    test('Analyse mit Figma-Daten', async ({ page }, info) => {
+      await vorbereiten(page);
+      await page.goto('./#/analyse');
+      await schriftenBereit(page);
+      await page.screenshot({ path: `${ORDNER}/${info.project.name}/abgeleitet_analyse-figma.png`, fullPage: true, animations: 'disabled' });
+    });
+  });
 });
+

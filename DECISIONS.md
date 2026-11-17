@@ -214,6 +214,39 @@ Zeile; Sprüche dürfen zwei Zeilen haben, ein E2E-Test prüft das für alle bei
 393 px. Neues Feld `tagesspruch` → Schema-Version 2; ältere Daten und
 Sicherungen werden migriert und bekommen den Spruch eingeschaltet.
 
+### Analyse-Seite (`#/analyse`)
+Nachträglicher Wunsch. Erreichbar über einen **dritten Tab** „Analyse"; die
+Tab-Leiste in Figma `10:50` hat nur zwei. Das Icon ist Lucide
+„chart-column" im Strichstil der Figma-Icons. Inhalt, von oben nach unten:
+
+| Abschnitt | Form | Warum diese Form |
+| --- | --- | --- |
+| Hochrechnung | Zahl + Linie (ausgegeben kumuliert vs. zugeflossenes Budget, gestrichelt hochgerechnet) | Die eine Frage „reicht's bis zum Zahltag?" als Zahl, der Verlauf als Kontext. Eine Achse. |
+| Pro Tag | Säulen je Tag mit Tagesbudget als Linie, Orange = drüber | Zeigt die Ausreißer-Tage. |
+| Kennzahlen | 4 Kacheln | Einzelwerte, kein Diagramm nötig. |
+| Wohin dein Geld geht | Rangliste mit Balken, eine Farbe | Anteile vergleichen; kein Kreisdiagramm (schlecht ablesbar bei ähnlichen Werten). |
+| Monate im Vergleich | Säulen je Zyklus, Strich = Budget | Trend über bis zu 6 Monate. |
+| Wochentage | Säulen, höchster Tag hervorgehoben | Muster („am Wochenende teuer"). |
+| Was dich ein Monat kostet | Summe + dünner geteilter Balken, Liste der Abbuchungen in 30 Tagen | Budget und Fixkosten zusammen, sonst nirgends sichtbar. |
+
+Farben nur aus den Tokens: Blau = ausgegeben, Hellgrau = Budget bzw.
+zugeflossen (wie im Balken der Pot-Karten), Orange = drüber, `#9D9D9D` für
+Fixkosten. Geprüft mit dem Palettenprüfer: Blau und Hellgrau ΔE 23 (Ziel ≥ 8)
+auch bei Rot-Grün-Schwäche, alle Marken ≥ 3:1 zur Karte. Die Prüfregeln für
+bunte Kategorien-Paletten (Helligkeitsband, Mindest-Sättigung) greifen hier
+nicht: Grau ist bewusst neutral, Blau ist die Figma-Akzentfarbe.
+
+Jedes Diagramm: Antippen bzw. Pfeiltasten zeigen den Wert, Screenreader lesen
+ihn über eine Live-Region vor, und „Werte als Tabelle" zeigt alle Zahlen ohne
+Grafik. Nichts ist nur über Farbe oder nur über Antippen erreichbar.
+
+**Hochrechnung:** bewusst einfach, linear: bisherige Ausgaben ÷ vergangene
+Tage × Tage im Zyklus. Das ist eine Extrapolation, keine Vorhersage; ein
+großer Einkauf am Monatsanfang verzerrt sie. Deshalb erst ab Tag 3. Der
+„Spielraum" ist (Budget − Ausgaben) ÷ verbleibende Tage einschließlich heute.
+**Wochentage** mitteln über alle Tage seit dem ersten Pot, auch Tage ohne
+Ausgabe; unter 4 Wochen steht ein Hinweis, dass die Werte wenig aussagen.
+
 ### Texte aus dem Figma
 „a month" und „daily" bleiben englisch, wie im Figma. Das Start-Motto ist
 der Figma-Text und in den Einstellungen änderbar.

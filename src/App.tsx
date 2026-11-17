@@ -13,6 +13,7 @@ import { FixkostenSheet, type FixkostenSheetZustand } from './screens/FixkostenS
 import { PotVerlauf } from './screens/PotVerlauf';
 import { Einstellungen } from './screens/Einstellungen';
 import { Onboarding } from './screens/Onboarding';
+import { Analyse } from './screens/Analyse';
 
 let toastZaehler = 0;
 
@@ -75,7 +76,7 @@ export function App() {
     );
   }
 
-  const tab = route.seite === 'fixkosten' ? 'fixkosten' : 'budget';
+  const tab = route.seite === 'fixkosten' ? 'fixkosten' : route.seite === 'analyse' ? 'analyse' : 'budget';
 
   return (
     <>
@@ -85,6 +86,7 @@ export function App() {
         <PotVerlauf potId={route.id} heute={heute} onBearbeiten={(a) => setAusgabeSheet({ offen: true, bearbeiten: a })} />
       )}
       {route.seite === 'einstellungen' && <Einstellungen heute={heute} zeigeToast={zeigeToast} />}
+      {route.seite === 'analyse' && <Analyse heute={heute} />}
 
       {route.seite !== 'einstellungen' && (
         <Fab
