@@ -9,8 +9,8 @@
     "build": "tsc --noEmit -p tsconfig.app.json && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "TZ=Europe/Berlin vitest run",
+    "test:watch": "TZ=Europe/Berlin vitest",
     "e2e": "playwright test",
     "icons": "node scripts/app-icons.mjs"
   },
