@@ -1,0 +1,145 @@
+/* Figma 12:196: Betrag in Momo 56 und "€" in 35 %, gemeinsame Grundlinie.
+   Das native Feld liegt ueber einem unsichtbaren Spiegeltext, damit es genau
+   so breit ist wie die Zahl und das "€" direkt dahinter steht. */
+.betrag {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  height: 73px;
+  font-family: var(--f-num);
+  font-size: 56px;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.betrag * {
+  letter-spacing: var(--ls-num);
+}
+
+.spiegel {
+  visibility: hidden;
+  min-width: 0.6em;
+}
+
+.betragFeld {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(100% - 1.2em);
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--c-text);
+  font: inherit;
+  caret-color: var(--c-accent);
+  outline: none;
+}
+
+.betragFeld::placeholder {
+  color: var(--c-text-35);
+}
+
+.waehrung {
+  color: var(--c-text-35);
+}
+
+/* Figma 12:199: Beschriftung und Feld, Abstand 8. */
+.feldGruppe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Figma 12:201: bg #1E1E1E, p 12, Hoehe 40. Schrift 16 statt 15 px:
+   unter 16 px zoomt iOS beim Fokus hinein. */
+.feld {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-size: 16px;
+  line-height: 40px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.feld::placeholder {
+  color: var(--c-text-35);
+}
+
+.feld:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: -2px;
+}
+
+/* Figma 12:244: "abgebucht am" mit Wert und Chevron. Ein natives <select>
+   liegt unsichtbar darueber, damit iOS sein Auswahlrad zeigt. */
+.auswahl {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+}
+
+.auswahl:focus-within {
+  outline: 2px solid var(--c-accent);
+  outline-offset: -2px;
+}
+
+.wert {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--c-text);
+  font-size: 16px;
+  line-height: normal;
+}
+
+.select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Abgeleitet: neue Kategorie mit Name und Symbol. */
+.neueKategorie {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.symbole {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.symbol {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+
+.symbolAktiv {
+  background: var(--c-accent);
+  color: var(--c-bg);
+}

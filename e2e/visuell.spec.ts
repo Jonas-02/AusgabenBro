@@ -48,4 +48,26 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
     await tippe(page, '32');
     await foto(page, info.project.name, '7-198_ausgabe-vorgriff');
   });
+
+  test.describe('Fixkosten', () => {
+    // Figma 11:46 ist 951 px hoch, der Screen scrollt.
+    test.use({ viewport: { width: 393, height: 951 } });
+    test('11-46 Fixkosten', async ({ page }, info) => {
+      await vorbereiten(page);
+      await page.goto('./#/fixkosten');
+      await foto(page, info.project.name, '11-46_fixkosten');
+    });
+  });
+
+  test('12-62 Fixkosten hinzufuegen', async ({ page }, info) => {
+    await vorbereiten(page);
+    await page.goto('./#/fixkosten');
+    await page.getByRole('button', { name: 'Fixkosten hinzufügen' }).click();
+    await sheetOffen(page);
+    await page.getByLabel('Betrag in Euro').fill('34,99');
+    await page.getByLabel('wofür?').fill('Internet');
+    await page.locator('dialog[open] select').first().selectOption('20');
+    await page.locator('dialog[open]').getByRole('heading').click(); // Fokus aus dem Feld, Tastatur zu
+    await foto(page, info.project.name, '12-62_fixkosten-sheet');
+  });
 });

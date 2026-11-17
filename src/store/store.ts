@@ -27,7 +27,7 @@ interface Aktionen {
   potLoeschen(id: string): void;
   potVerschieben(id: string, richtung: -1 | 1): void;
 
-  fixkostenSpeichern(fk: Omit<Fixkosten, 'id'> & { id?: string }): void;
+  fixkostenSpeichern(fk: Omit<Fixkosten, 'id'> & { id?: string | undefined }): void;
   fixkostenLoeschen(id: string): void;
   kategorieAnlegen(name: string, symbol: string): string;
 

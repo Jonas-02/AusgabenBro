@@ -91,4 +91,46 @@ test.describe('Masse wie in Figma', () => {
     pruefe(await box(page, 'dialog [role="group"]'), { x: 20, y: 552, w: 353, h: 200 }, 'Zahlenfeld 7:164');
     pruefe(await box(page, 'dialog [class*="_cta_"]'), { x: 20, y: 766, w: 353, h: 52 }, 'Speichern 7:196');
   });
+
+  test.describe('Fixkosten', () => {
+    test.use({ viewport: { width: 393, height: 951 } });
+    test('Fixkosten 11:46', async ({ page }) => {
+      await vorbereiten(page);
+      await page.goto('./#/fixkosten');
+      await schriftenBereit(page);
+      const karten = 'main [class*="_karte_"]';
+      pruefe(await box(page, 'main h1'), { x: 28, y: 32, w: 337, h: 48 }, 'Kopf 11:47');
+      pruefe(await box(page, karten, 0), { x: 28, y: 100, w: 337, h: 54 }, 'Uebersicht 11:48');
+      pruefe(await box(page, '#fix-titel'), { y: 174, h: 19 }, 'Alle Fixkosten 11:63');
+      pruefe(await box(page, 'main [class*="_gruppeLabel_"]', 0), { y: 205, h: 14 }, 'Label Wohnen 11:65');
+      pruefe(await box(page, karten, 1), { y: 223, h: 151 }, 'Karte Wohnen 11:71');
+      pruefe(await box(page, 'main [class*="_posten_"]', 0), { x: 29, y: 224, w: 335, h: 50 }, 'Miete 11:72');
+      pruefe(await box(page, 'main [class*="_posten_"]', 1), { y: 274, h: 50 }, 'Strom 11:78');
+      pruefe(await box(page, karten, 2), { y: 404, h: 115 }, 'Karte Versicherungen 11:95');
+      pruefe(await box(page, 'main [class*="_posten_"]', 3), { y: 405, h: 57 }, 'Haftpflicht 11:96');
+      pruefe(await box(page, karten, 3), { y: 549, h: 151 }, 'Karte Abos 11:118');
+      pruefe(await box(page, karten, 4), { y: 730, h: 51 }, 'Karte Mobilitaet 11:145');
+      pruefe(await box(page, 'nav[aria-label="Hauptnavigation"]'), { x: 0, y: 868, w: 393, h: 83 }, 'Tab-Leiste 11:152');
+      pruefe(await box(page, 'button[aria-label="Fixkosten hinzufügen"]'), { x: 265, y: 806, w: 112, h: 46 }, 'FAB 11:165', TEXTBREITE);
+    });
+  });
+
+  test('Fixkosten-Sheet 12:187', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/fixkosten');
+    await page.getByRole('button', { name: 'Fixkosten hinzufügen' }).click();
+    await page.locator('dialog[data-zustand="offen"]').waitFor();
+    await page.waitForTimeout(400);
+    await schriftenBereit(page);
+    const d = 'dialog[open]';
+    pruefe(await box(page, `${d} [class*="_kopf_"]`), { x: 20, y: 341, w: 353, h: 28 }, 'Kopf 12:190');
+    pruefe(await box(page, `${d} label[class*="_betrag_"]`), { x: 20, y: 383, h: 73 }, 'Betrag 12:196');
+    pruefe(await box(page, `${d} input[class*="_feld_"]`), { x: 20, y: 491, w: 353, h: 40 }, 'Feld 12:201');
+    const kat = [{ x: 20, y: 566, w: 82 }, { x: 110, y: 566, w: 177 }, { x: 20, y: 604, w: 131 }, { x: 159, y: 604, w: 83 }, { x: 250, y: 604, w: 116 }];
+    for (const [i, c] of kat.entries()) pruefe(await box(page, `${d} [class*="_chips_"] >> nth=0 >> button`, i), { ...c, h: 30 }, `Kategorie-Chip ${i + 1}`, TEXTBREITE);
+    const rh = [{ x: 20, w: 70 }, { x: 98, w: 84 }, { x: 190, w: 57 }];
+    for (const [i, c] of rh.entries()) pruefe(await box(page, `${d} [class*="_chips_"] >> nth=1 >> button`, i), { ...c, y: 669, h: 29 }, `Rhythmus-Chip ${i + 1}`, TEXTBREITE);
+    pruefe(await box(page, `${d} label[class*="_auswahl_"]`), { x: 20, y: 712, w: 353, h: 40 }, 'Abbuchungstag 12:244');
+    pruefe(await box(page, `${d} [class*="_cta_"]`), { x: 20, y: 766, w: 353, h: 52 }, 'Speichern 12:250');
+  });
 });
