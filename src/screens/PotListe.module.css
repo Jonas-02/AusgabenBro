@@ -53,3 +53,10 @@
 .pfeil:active:not(:disabled) {
   color: var(--c-text);
 }
+
+/* Grosse Schrift / schmale Geraete: etwas mehr Platz fuer den Namen. */
+@media (max-width: 340px) {
+  .pfeil {
+    width: 34px;
+  }
+}

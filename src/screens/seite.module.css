@@ -100,9 +100,10 @@
 /* Kopfzeile einer Betragskarte: px 10, py 5. */
 .kartenKopf {
   display: flex;
+  flex-wrap: wrap; /* nur bei grosser Schrift: Meta rutscht unter den Betrag */
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: 4px 8px;
   padding: 5px 10px;
 }
 
@@ -112,6 +113,7 @@
   flex-direction: column;
   align-items: flex-end;
   flex: none;
+  margin-left: auto;
   color: var(--c-accent);
   font-size: 12px;
   text-align: right;

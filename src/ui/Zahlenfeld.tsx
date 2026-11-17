@@ -30,7 +30,7 @@ export function Zahlenfeld({ onTaste, onLoeschen }: Props) {
       <div className={styles.reihe}>
         <Taste label="," aria="Komma" onClick={() => onTaste(',')} />
         <Taste label="0" onClick={() => onTaste('0')} />
-        <button type="button" className={styles.taste} onClick={onLoeschen} aria-label="Löschen">
+        <button type="button" className={styles.taste} onClick={onLoeschen} aria-label="Letzte Ziffer löschen">
           <Icon name="delete" />
         </button>
       </div>

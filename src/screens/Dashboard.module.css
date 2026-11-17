@@ -14,11 +14,16 @@
    Feste Hoehe: Manjari und Momo haben verschiedene Ober- und Unterlaengen,
    gemischt wuerde die Zeilenbox sonst auf 18 statt 16 px wachsen. */
 .satz {
-  height: 16px;
+  min-height: 16px;
   padding: 0 10px;
   font-size: 12px;
   line-height: 16px;
-  white-space: nowrap;
+}
+
+/* Die Momo-Zahlen tragen nichts zur Zeilenhoehe bei: so bleibt die Zeile
+   16 px hoch wie im Figma und darf bei grosser Schrift trotzdem umbrechen. */
+.satz > span {
+  line-height: 0;
 }
 
 .blau {

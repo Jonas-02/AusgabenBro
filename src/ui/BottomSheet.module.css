@@ -104,6 +104,12 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Bei grosser Schrift scrollt der Inhalt; dann darf nichts schrumpfen
+   (sonst wird z. B. der Speichern-Knopf flach gedrueckt). */
+.inhalt > * {
+  flex-shrink: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Nur einblenden, nicht hochschieben. */
   .sheet {

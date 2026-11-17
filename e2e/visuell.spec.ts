@@ -87,7 +87,7 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
     test('Pot-Verlauf', async ({ page }, info) => {
       await vorbereiten(page);
       await page.goto('./#/budget');
-      await page.getByRole('button', { name: /Drogen: Ausgaben ansehen/ }).click();
+      await page.getByRole('button', { name: /^Drogen:/ }).click();
       await foto(page, info.project.name, 'abgeleitet_pot-verlauf');
     });
 
@@ -99,6 +99,30 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
       await page.getByRole('button', { name: /Einkauf und Haushalt/ }).first().click();
       await sheetOffen(page);
       await foto(page, info.project.name, 'abgeleitet_pot-sheet');
+    });
+  });
+
+  test.describe('Grosse Schrift (Safari-Zoom 150 %)', () => {
+    test.use({ viewport: { width: 262, height: 568 } });
+    test('Screens', async ({ page }, info) => {
+      await vorbereiten(page);
+      for (const [name, ziel] of [
+        ['dashboard', './#/budget'],
+        ['fixkosten', './#/fixkosten'],
+        ['pot-verlauf', './#/pot/drogen'],
+        ['einstellungen', './#/einstellungen']
+      ] as const) {
+        await page.goto(ziel);
+        await schriftenBereit(page);
+        await page.screenshot({ path: `${ORDNER}/${info.project.name}/gross_${name}.png`, fullPage: true, animations: 'disabled' });
+      }
+      await page.goto('./#/budget');
+      await page.getByRole('button', { name: 'Ausgabe hinzufügen' }).click();
+      await sheetOffen(page);
+      await tippe(page, '32');
+      await foto(page, info.project.name, 'gross_ausgabe-sheet');
+      await page.locator('dialog[open] [class*="_inhalt_"]').evaluate((e) => e.scrollTo(0, e.scrollHeight));
+      await foto(page, info.project.name, 'gross_ausgabe-sheet-unten');
     });
   });
 });

@@ -89,7 +89,7 @@ export function PotKarte({ pot, stand, klickbar = true }: { pot: Pot; stand: Pot
       </div>
       <Karte
         className={d.potkarte}
-        {...(klickbar ? { onClick: () => navigiere({ seite: 'pot', id: pot.id }), label: `${pot.name}: Ausgaben ansehen` } : {})}
+        {...(klickbar ? { onClick: () => navigiere({ seite: 'pot', id: pot.id }), label: `${pot.name}: ${euro(stand.stand)}${negativ ? ' im Minus' : ' übrig'}. Ausgaben ansehen` } : {})}
       >
         <div className={s.kartenKopf}>
           <Betrag cent={stand.stand} groesse={25} kommaLuft className={negativ ? s.minus : undefined} />

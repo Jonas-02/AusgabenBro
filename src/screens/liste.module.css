@@ -38,12 +38,11 @@
 }
 
 /* Figma 11:74: Manjari 14 weiss. */
+/* Darf umbrechen statt abgeschnitten zu werden (lange Namen, grosse Schrift). */
 .name {
   font-size: 14px;
   line-height: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: break-word;
 }
 
 /* Figma 11:75: Manjari 11, 60 % bzw. blau, wenn noch bevorstehend. */
@@ -51,6 +50,9 @@
   color: var(--c-text-2);
   font-size: 11px;
   line-height: 12px;
+}
+
+.rechts .unter {
   white-space: nowrap;
 }
 
