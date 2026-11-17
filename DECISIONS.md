@@ -12,6 +12,16 @@ nur Chromium. Deshalb gibt es zwei Playwright-Projekte:
 `webkit-iphone` läuft in der GitHub Action und ist dort Voraussetzung für den
 Deploy, `chromium-iphone` dient lokal. Beide nutzen 393×852.
 
+### Offline-Test in WebKit
+In der CI bricht Playwright-WebKit ein Neuladen nach `context.setOffline(true)`
+mit „WebKit encountered an internal error" ab, obwohl der Service Worker die
+Seite da schon kontrolliert. Lokal lässt sich das nicht nachstellen (kein
+WebKit). Deshalb zwei Tests: „Service Worker hält alle Dateien für offline
+bereit" prüft in beiden Engines, dass HTML, JS, CSS, Manifest, Icons und
+Schriften im Cache liegen; „lädt ohne Netz neu" lädt tatsächlich offline neu
+und läuft nur in Chromium. Auf dem iPhone selbst ist der Offline-Start einmal
+von Hand zu prüfen (Flugmodus, App vom Home-Bildschirm öffnen).
+
 ### Audit-Meldungen in `workbox-build`
 `npm audit` meldet vier mittlere Schwachstellen in `glob`/`minimatch`, die
 `vite-plugin-pwa` über `workbox-build` mitbringt. Beide laufen nur beim Bauen

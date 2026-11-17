@@ -5,15 +5,19 @@ GitHub Pages, genutzt als Home-Bildschirm-App in Safari auf dem iPhone.
 
 ## Schritte
 
-| # | Schritt | Ergebnis |
-|---|---|---|
-| 1 | Figma einlesen | Referenz-Screenshots aller 5 Frames in `design/figma/`, alle Icons als SVG, Maße und Tokens notiert |
-| 2 | Grundgerüst | Vite + React + TS strict, Fontsource (selbst gehostet), Tokens als Custom Properties, Zustand mit versioniertem `persist`, Hash-Routing, PWA, GitHub Action |
-| 3 | Fachlogik | `src/domain/` als reine Funktionen: Geld, Datum, Zyklus, Pot, Vorschau, Fixkosten, Zahlenfeld. Alle Pflichttests aus 3.7 grün, bevor es weitergeht |
-| 4 | UI-Bausteine | Karte, Balken, Chip, Keypad-Taste, Schnellbetrag, FAB, Tab-Leiste, Bottom Sheet, Betrag mit Schriftmischung, Toast |
-| 5 | Screens | Dashboard → Ausgaben-Sheet → Fixkosten → Fixkosten-Sheet → abgeleitete Screens (Pot-Verlauf, Bearbeiten/Löschen, Einstellungen, Onboarding) |
-| 6 | Visuelle Abnahme | Playwright bei 393×852 alle Screens und Zustände fotografieren, gegen `design/figma/` vergleichen, Abweichungen beheben oder in `DECISIONS.md` begründen |
-| 7 | Doku und Deploy | `README.md`, Push, Deploy prüfen |
+| # | Schritt | Ergebnis | Stand |
+|---|---|---|---|
+| 1 | Figma einlesen | Referenz-Screenshots aller 5 Frames in `design/figma/`, alle Icons als SVG, Maße und Tokens notiert | erledigt |
+| 2 | Grundgerüst | Vite + React + TS strict, Fontsource (selbst gehostet), Tokens als Custom Properties, Zustand mit versioniertem `persist`, Hash-Routing, PWA, GitHub Action | erledigt |
+| 3 | Fachlogik | `src/domain/` als reine Funktionen: Geld, Datum, Zyklus, Pot, Vorschau, Fixkosten, Zahlenfeld. Alle Pflichttests aus 3.7 grün, bevor es weitergeht | erledigt |
+| 4 | UI-Bausteine | Karte, Balken, Chip, Keypad-Taste, Schnellbetrag, FAB, Tab-Leiste, Bottom Sheet, Betrag mit Schriftmischung, Toast | erledigt |
+| 5 | Screens | Dashboard → Ausgaben-Sheet → Fixkosten → Fixkosten-Sheet → abgeleitete Screens (Pot-Verlauf, Bearbeiten/Löschen, Einstellungen, Onboarding) | erledigt |
+| 6 | Visuelle Abnahme | Playwright bei 393×852 alle Screens und Zustände fotografieren, gegen `design/figma/` vergleichen, Abweichungen beheben oder in `DECISIONS.md` begründen | erledigt |
+| 7 | Doku und Deploy | `README.md`, Push, Deploy prüfen | erledigt |
+
+Abnahme (Prompt, Abschnitt 8): `e2e/masse.spec.ts` prüft alle Figma-Frames
+auf 1 px, `e2e/funktion.spec.ts` deckt die übrigen Kriterien ab, beide laufen
+vor jedem Deploy in WebKit.
 
 ## Architektur
 
