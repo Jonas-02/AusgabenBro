@@ -10,6 +10,9 @@ import { Dashboard } from './screens/Dashboard';
 import { Fixkosten } from './screens/Fixkosten';
 import { AusgabeSheet, type AusgabeSheetZustand } from './screens/AusgabeSheet';
 import { FixkostenSheet, type FixkostenSheetZustand } from './screens/FixkostenSheet';
+import { PotVerlauf } from './screens/PotVerlauf';
+import { Einstellungen } from './screens/Einstellungen';
+import { Onboarding } from './screens/Onboarding';
 
 let toastZaehler = 0;
 
@@ -64,7 +67,12 @@ export function App() {
   );
 
   if (!onboardingFertig) {
-    return <p style={{ padding: 28 }}>Onboarding folgt.</p>;
+    return (
+      <>
+        <Onboarding heute={heute} zeigeToast={zeigeToast} />
+        <Toast toast={toast} onEnde={toastEnde} ueberFab={false} />
+      </>
+    );
   }
 
   const tab = route.seite === 'fixkosten' ? 'fixkosten' : 'budget';
@@ -73,6 +81,10 @@ export function App() {
     <>
       {route.seite === 'budget' && <Dashboard heute={heute} />}
       {route.seite === 'fixkosten' && <Fixkosten heute={heute} onBearbeiten={(fk) => setFixSheet({ offen: true, bearbeiten: fk })} />}
+      {route.seite === 'pot' && (
+        <PotVerlauf potId={route.id} heute={heute} onBearbeiten={(a) => setAusgabeSheet({ offen: true, bearbeiten: a })} />
+      )}
+      {route.seite === 'einstellungen' && <Einstellungen heute={heute} zeigeToast={zeigeToast} />}
 
       {route.seite !== 'einstellungen' && (
         <Fab
@@ -85,7 +97,7 @@ export function App() {
         />
       )}
       <TabBar aktiv={tab} />
-      <Toast toast={toast} onEnde={toastEnde} />
+      <Toast toast={toast} onEnde={toastEnde} ueberFab={route.seite !== 'einstellungen'} />
 
       <AusgabeSheet
         {...ausgabeSheet}

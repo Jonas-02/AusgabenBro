@@ -65,3 +65,25 @@ export function monatsname(monat: number): string {
 export function zwischen(t: Tag, von: Tag, bis: Tag): boolean {
   return t >= von && t <= bis;
 }
+
+const KURZ = new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+/** "Di., 17. Nov." */
+export function kurzDatum(t: Tag): string {
+  const { jahr, monat, tag: d } = zerlege(t);
+  return KURZ.format(new Date(Date.UTC(jahr, monat - 1, d)));
+}
+
+/** "17. November" */
+export function langDatum(t: Tag): string {
+  const { monat, tag: d } = zerlege(t);
+  return `${d}. ${monatsname(monat)}`;
+}
+
+/** "heute", "gestern" oder null. */
+export function relativerTag(t: Tag, heuteTag: Tag): string | null {
+  const n = differenz(t, heuteTag);
+  if (n === 0) return 'heute';
+  if (n === -1) return 'gestern';
+  return null;
+}

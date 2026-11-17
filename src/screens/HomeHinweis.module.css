@@ -1,0 +1,50 @@
+.karte {
+  gap: 12px;
+  padding: 12px;
+}
+
+.schritte {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.schritte li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Nummer im Stil der aktiven Chips (Figma 7:4). */
+.nr {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-card);
+  background: var(--c-accent);
+  color: var(--c-bg);
+  font-family: var(--f-num);
+  letter-spacing: var(--ls-num);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.inline {
+  display: inline-block !important;
+  vertical-align: -3px;
+  margin-left: 2px;
+  color: var(--c-accent);
+}
+
+.text {
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}

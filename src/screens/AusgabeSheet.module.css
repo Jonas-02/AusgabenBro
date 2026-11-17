@@ -67,21 +67,6 @@
   gap: 8px;
 }
 
-.frage {
-  color: var(--c-text-2);
-  font-size: 12px;
-  line-height: normal;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 /* Figma 7:139 "Auswirkung auf Pot": bg #1E1E1E, p 12, Abstand 8. */
 .auswirkung {
   display: flex;
@@ -140,33 +125,5 @@
 }
 
 /* Figma 7:196: h 52, bg Akzent, Manjari 17 in #1E1E1E. */
-.cta {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 52px;
-  border-radius: var(--r-card);
-  background: var(--c-accent);
-  color: var(--c-bg);
-  font-size: 17px;
-  line-height: normal;
-  transition: filter 120ms;
-}
-
-.cta:active {
-  filter: brightness(0.92);
-}
-
-.cta > span {
-  transform: translateY(1px);
-}
 
 /* Abgeleitet: Loeschen als Text in Orange. */
-.loeschen {
-  align-self: center;
-  min-height: 44px;
-  padding: 0 16px;
-  color: var(--c-minus);
-  font-size: 15px;
-  line-height: normal;
-}

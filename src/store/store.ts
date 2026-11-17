@@ -24,7 +24,9 @@ interface Aktionen {
 
   potAnlegen(entwurf: PotEntwurf): void;
   potAendern(id: string, teil: Partial<PotEntwurf>): void;
-  potLoeschen(id: string): void;
+  /** Loescht den Pot samt Ausgaben und gibt beides fuer "Rueckgaengig" zurueck. */
+  potLoeschen(id: string): { pot: Pot; ausgaben: Ausgabe[]; index: number } | null;
+  potWiederherstellen(geloescht: { pot: Pot; ausgaben: Ausgabe[]; index: number }): void;
   potVerschieben(id: string, richtung: -1 | 1): void;
 
   fixkostenSpeichern(fk: Omit<Fixkosten, 'id'> & { id?: string | undefined }): void;
@@ -137,11 +139,27 @@ export const useStore = create<Store>()(
       },
 
       potLoeschen(id) {
-        set((s) => ({
+        const s = get();
+        const index = s.pots.findIndex((p) => p.id === id);
+        const pot = s.pots[index];
+        if (!pot) return null;
+        const ausgaben = s.ausgaben.filter((a) => a.potId === id);
+        set({
           pots: s.pots.filter((p) => p.id !== id),
           ausgaben: s.ausgaben.filter((a) => a.potId !== id),
           letzterPot: s.letzterPot === id ? null : s.letzterPot
-        }));
+        });
+        return { pot, ausgaben, index };
+      },
+
+      potWiederherstellen({ pot, ausgaben, index }) {
+        set((s) => {
+          if (s.pots.some((p) => p.id === pot.id)) return s;
+          const pots = [...s.pots];
+          pots.splice(Math.min(index, pots.length), 0, pot);
+          const vorhanden = new Set(s.ausgaben.map((a) => a.id));
+          return { pots, ausgaben: [...s.ausgaben, ...ausgaben.filter((a) => !vorhanden.has(a.id))] };
+        });
       },
 
       potVerschieben(id, richtung) {

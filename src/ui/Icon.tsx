@@ -41,3 +41,15 @@ export function Icon({ name, groesse, drehung, className }: Props) {
 export function istSymbol(name: string): name is SymbolName {
   return (WAEHLBARE_ICONS as readonly string[]).includes(name);
 }
+
+/** Gesprochene Namen der waehlbaren Symbole (aria). */
+export const SYMBOL_LABEL: Record<SymbolName, string> = {
+  einkauf: 'Einkaufswagen',
+  drogen: 'Zigarette',
+  lifestyle: 'T-Shirt',
+  sonstiges: 'Pizza',
+  wohnen: 'Haus',
+  versicherungen: 'Schild',
+  abos: 'Dokument',
+  mobilitaet: 'Bus'
+};

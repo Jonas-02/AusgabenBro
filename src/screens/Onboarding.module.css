@@ -1,0 +1,36 @@
+/* Ohne Tab-Leiste und FAB: unten nur Home-Indikator plus Luft. */
+.seite {
+  padding-bottom: calc(max(var(--safe-bottom), 16px) + 16px);
+}
+
+/* Drei Striche oben, Farben wie Balken (Figma 1:2): blau erledigt, sonst Karte. */
+.fortschritt {
+  display: flex;
+  gap: 6px;
+}
+
+.punkt,
+.punktAktiv {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--c-card);
+}
+
+.punktAktiv {
+  background: var(--c-accent);
+}
+
+.text {
+  color: var(--c-text-2);
+  font-size: 15px;
+  line-height: 21px;
+}
+
+/* Hauptknopf unten, solange der Inhalt kuerzer als der Bildschirm ist. */
+.unten {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: auto;
+}

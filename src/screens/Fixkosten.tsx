@@ -7,6 +7,7 @@ import { Karte } from '../ui/Karte';
 import { Icon, istSymbol } from '../ui/Icon';
 import s from './seite.module.css';
 import f from './Fixkosten.module.css';
+import l from './liste.module.css';
 
 interface Props {
   heute: string;
@@ -79,14 +80,14 @@ export function Fixkosten({ heute, onBearbeiten }: Props) {
 function Posten({ fk, heute, onClick }: { fk: FixkostenTyp; heute: string; onClick: () => void }) {
   const z = zeile(fk, heute);
   return (
-    <button type="button" className={f.posten} onClick={onClick} aria-label={`${fk.name} bearbeiten`}>
-      <span className={f.info}>
-        <span className={f.name}>{fk.name}</span>
-        <span className={`${f.unter} ${z.bevorstehend ? f.bald : ''}`}>{z.unterzeile}</span>
+    <button type="button" className={l.posten} onClick={onClick}>
+      <span className={l.info}>
+        <span className={l.name}>{fk.name}</span>
+        <span className={`${l.unter} ${z.bevorstehend ? l.bald : ''}`}>{z.unterzeile}</span>
       </span>
-      <span className={f.rechts}>
-        <span className={f.wert}>{euro2(monatswert(fk))}</span>
-        {z.rechtsUnten && <span className={f.unter}>{z.rechtsUnten}</span>}
+      <span className={l.rechts}>
+        <span className={l.wert}>{euro2(monatswert(fk))}</span>
+        {z.rechtsUnten && <span className={l.unter}>{z.rechtsUnten}</span>}
       </span>
     </button>
   );

@@ -12,6 +12,7 @@ import { Schnellbetrag, Zahlenfeld } from '../ui/Zahlenfeld';
 import { ZahlText } from './Meta';
 import s from './AusgabeSheet.module.css';
 import seite from './seite.module.css';
+import f from './formular.module.css';
 
 export interface AusgabeSheetZustand {
   offen: boolean;
@@ -140,8 +141,8 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
       </div>
 
       <div className={s.potWahl}>
-        <p className={s.frage}>aus welchem Pot?</p>
-        <div className={s.chips}>
+        <p className={f.frage}>aus welchem Pot?</p>
+        <div className={f.chips}>
           {pots.map((p) => (
             <Chip
               key={p.id}
@@ -158,7 +159,7 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
         <div className={s.auswirkung} aria-live="polite">
           <div className={s.kopf}>
             <div className={s.danach}>
-              <p className={s.frage}>danach in {pot.name}</p>
+              <p className={f.frage}>danach in {pot.name}</p>
               <p className={`${s.nachher} ${v.nachher < 0 ? seite.minus : ''}`}>{euro(v.nachher)}</p>
             </div>
             <div className={s.vorher}>
@@ -177,14 +178,14 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
 
       <Zahlenfeld onTaste={taste} onLoeschen={rueck} />
 
-      <button type="button" className={s.cta} onClick={speichern} aria-describedby={hinweis ? 'betrag-hinweis' : undefined}>
+      <button type="button" className={f.cta} onClick={speichern} aria-describedby={hinweis ? 'betrag-hinweis' : undefined}>
         <span id={hinweis ? 'betrag-hinweis' : undefined}>{hinweis ?? (bearbeiten ? 'Änderung speichern' : 'Ausgabe speichern')}</span>
       </button>
 
       {bearbeiten && (
         <button
           type="button"
-          className={s.loeschen}
+          className={f.loeschen}
           onClick={() => {
             const weg = loeschen(bearbeiten.id);
             if (weg) onGeloescht(weg);

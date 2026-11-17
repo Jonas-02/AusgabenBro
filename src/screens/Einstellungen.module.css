@@ -1,0 +1,68 @@
+/* Ohne FAB: unten nur Tab-Leiste plus Luft. */
+.seite {
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 32px);
+}
+
+/* Formular in einer Karte: Innenabstand wie die Vorschau-Box in Figma 7:139. */
+.formKarte {
+  gap: 14px;
+  padding: 12px;
+}
+
+.hinweis {
+  margin-top: -6px;
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.titelZeile {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.summe {
+  color: var(--c-accent);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+/* Wie der FAB (Figma 10:51), aber flach in der Seite. */
+.hinzufuegen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 46px;
+  border-radius: var(--r-card);
+  background: var(--c-card);
+  color: var(--c-accent);
+  font-size: 15px;
+  line-height: normal;
+}
+
+.hinzufuegen:active {
+  filter: brightness(1.12);
+}
+
+.bestaetigungText {
+  color: var(--c-text-2);
+  font-size: 15px;
+  line-height: 21px;
+}
+
+.gefahr {
+  background: var(--c-minus);
+}
+
+.abbrechen {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 16px;
+  color: var(--c-text-2);
+  font-size: 15px;
+  line-height: normal;
+}

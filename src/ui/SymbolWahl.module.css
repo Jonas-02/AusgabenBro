@@ -1,0 +1,34 @@
+/* Abgeleitet aus den Chips (Figma 7:4): Flaeche #1E1E1E, Radius 4,
+   aktiv in Akzentblau mit dunklem Symbol. 44 px Tippflaeche. */
+.gruppe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.symbol {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  color: var(--c-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.aktiv {
+  background: var(--c-accent);
+  color: var(--c-bg);
+}
+
+.symbol:has(input:focus-visible) {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}

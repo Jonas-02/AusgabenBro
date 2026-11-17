@@ -1,14 +1,15 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { euro2, parseEuro } from '../domain/geld';
+import { parseEuro } from '../domain/geld';
 import { monatsname } from '../domain/datum';
 import { RHYTHMUS_TEXT } from '../domain/fixkosten';
 import type { Fixkosten, Rhythmus } from '../domain/typen';
 import { useStore } from '../store/store';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Chip } from '../ui/Chip';
-import { Icon, istSymbol, WAEHLBARE_ICONS, type SymbolName } from '../ui/Icon';
-import s from './FixkostenSheet.module.css';
-import a from './AusgabeSheet.module.css';
+import { Icon, istSymbol, type SymbolName } from '../ui/Icon';
+import { SymbolWahl } from '../ui/SymbolWahl';
+import s from './formular.module.css';
+import { BetragsFeld, alsEingabe } from './BetragsFeld';
 
 export interface FixkostenSheetZustand {
   offen: boolean;
@@ -42,14 +43,14 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
   const [neueKat, setNeueKat] = useState<{ name: string; symbol: SymbolName } | null>(null);
   const [hinweis, setHinweis] = useState<string | null>(null);
   const betragFeld = useRef<HTMLInputElement>(null);
-  const ids = { betrag: useId(), name: useId(), tag: useId(), monat: useId(), kat: useId() };
+  const ids = { name: useId(), tag: useId(), monat: useId(), kat: useId() };
 
   useEffect(() => {
     if (!offen) return;
     setHinweis(null);
     setNeueKat(null);
     if (bearbeiten) {
-      setBetrag(euro2(bearbeiten.cent).replace(/\s*€$/, '').replace(/ /g, ''));
+      setBetrag(alsEingabe(bearbeiten.cent));
       setName(bearbeiten.name);
       setKategorieId(bearbeiten.kategorieId);
       setRhythmus(bearbeiten.rhythmus);
@@ -104,28 +105,10 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
 
   return (
     <BottomSheet offen={offen} onSchliessen={onSchliessen} titel={bearbeiten ? 'Fixkosten bearbeiten' : 'Neue Fixkosten'}>
-      <label className={s.betrag} htmlFor={ids.betrag}>
-        <span className={`${s.spiegel} ende-num`} aria-hidden="true">
-          {betrag || '0,00'}
-        </span>
-        <input
-          ref={betragFeld}
-          id={ids.betrag}
-          className={s.betragFeld}
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0,00"
-          aria-label="Betrag in Euro"
-          value={betrag}
-          onChange={(e) => setBetrag(e.target.value.replace(/[^\d.,]/g, '').slice(0, 9))}
-        />
-        <span className={s.waehrung} aria-hidden="true">
-          €
-        </span>
-      </label>
+      <BetragsFeld wert={betrag} onAendern={setBetrag} label="Betrag in Euro" feldRef={betragFeld} />
 
       <div className={s.feldGruppe}>
-        <label className={a.frage} htmlFor={ids.name}>
+        <label className={s.frage} htmlFor={ids.name}>
           wofür?
         </label>
         <input
@@ -142,10 +125,10 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
       </div>
 
       <div className={s.feldGruppe} role="group" aria-labelledby={ids.kat}>
-        <p id={ids.kat} className={a.frage}>
+        <p id={ids.kat} className={s.frage}>
           Kategorie
         </p>
-        <div className={a.chips}>
+        <div className={s.chips}>
           {kategorien.map((k) => (
             <Chip
               key={k.id}
@@ -178,28 +161,14 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
               value={neueKat.name}
               onChange={(e) => setNeueKat({ ...neueKat, name: e.target.value })}
             />
-            <div className={s.symbole} role="radiogroup" aria-label="Symbol">
-              {WAEHLBARE_ICONS.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  role="radio"
-                  aria-checked={neueKat.symbol === n}
-                  aria-label={n}
-                  className={`${s.symbol} ${neueKat.symbol === n ? s.symbolAktiv : ''}`}
-                  onClick={() => setNeueKat({ ...neueKat, symbol: n })}
-                >
-                  <Icon name={n} />
-                </button>
-              ))}
-            </div>
+            <SymbolWahl legende="Symbol der Kategorie" wert={neueKat.symbol} onWahl={(n) => setNeueKat({ ...neueKat, symbol: n })} />
           </div>
         )}
       </div>
 
       <div className={s.feldGruppe} role="group" aria-label="Wie oft?">
-        <p className={a.frage}>wie oft?</p>
-        <div className={a.chips}>
+        <p className={s.frage}>wie oft?</p>
+        <div className={s.chips}>
           {RHYTHMEN.map((r) => (
             <Chip key={r} label={RHYTHMUS_TEXT[r]} aktiv={r === rhythmus} onClick={() => setRhythmus(r)} />
           ))}
@@ -207,7 +176,7 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
       </div>
 
       <label className={s.auswahl} htmlFor={ids.tag}>
-        <span className={a.frage}>abgebucht am</span>
+        <span className={s.frage}>abgebucht am</span>
         <span className={s.wert}>
           {tag}. des Monats
           <Icon name="chevronDown" />
@@ -223,7 +192,7 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
 
       {rhythmus !== 'monthly' && (
         <label className={s.auswahl} htmlFor={ids.monat}>
-          <span className={a.frage}>{monatLabel}</span>
+          <span className={s.frage}>{monatLabel}</span>
           <span className={s.wert}>
             {monatsname(startMonat)}
             <Icon name="chevronDown" />
@@ -238,14 +207,14 @@ export function FixkostenSheet({ offen, bearbeiten, heute, onSchliessen, onGespe
         </label>
       )}
 
-      <button type="button" className={a.cta} onClick={absenden}>
+      <button type="button" className={s.cta} onClick={absenden}>
         <span>{hinweis ?? 'Fixkosten speichern'}</span>
       </button>
 
       {bearbeiten && (
         <button
           type="button"
-          className={a.loeschen}
+          className={s.loeschen}
           onClick={() => {
             loeschen(bearbeiten.id);
             onGeloescht(bearbeiten);

@@ -38,19 +38,7 @@ export function Dashboard({ heute }: { heute: string }) {
           <Icon name="settings" />
         </a>
 
-        <Karte className={d.hauptkarte}>
-          <div className={s.kartenKopf}>
-            <Betrag cent={g.stand} groesse={32} kommaLuft className={g.stand < 0 ? s.minus : undefined} />
-            <MonatTagMeta monatlich={g.monatlich} proTag={g.proTag} />
-          </div>
-          <div className={d.verlauf}>
-            <p className={d.satz}>
-              du hast <span className={s.zahl}>{euro(g.ausgegeben)}</span> von{' '}
-              <span className={`${s.zahl} ${d.blau}`}>{euro(g.zugeflossen)}</span> ausgegeben
-            </p>
-            <Balken daten={standBalken(g)} hoehe={28} />
-          </div>
-        </Karte>
+        <StandKarte stand={g} />
       </div>
 
       <section className={s.abschnitt} aria-labelledby="pots-titel">
@@ -67,6 +55,27 @@ export function Dashboard({ heute }: { heute: string }) {
         ))}
       </section>
     </main>
+  );
+}
+
+type Stand = Pick<PotStand, 'stand' | 'monatlich' | 'proTag' | 'ausgegeben' | 'zugeflossen'>;
+
+/** Figma 1:4: Betrag, Monat/Tag, Satz "du hast x von y ausgegeben", Balken. */
+export function StandKarte({ stand }: { stand: Stand }) {
+  return (
+    <Karte className={d.hauptkarte}>
+      <div className={s.kartenKopf}>
+        <Betrag cent={stand.stand} groesse={32} kommaLuft className={stand.stand < 0 ? s.minus : undefined} />
+        <MonatTagMeta monatlich={stand.monatlich} proTag={stand.proTag} />
+      </div>
+      <div className={d.verlauf}>
+        <p className={d.satz}>
+          du hast <span className={s.zahl}>{euro(stand.ausgegeben)}</span> von{' '}
+          <span className={`${s.zahl} ${d.blau}`}>{euro(stand.zugeflossen)}</span> ausgegeben
+        </p>
+        <Balken daten={standBalken(stand)} hoehe={28} />
+      </div>
+    </Karte>
   );
 }
 

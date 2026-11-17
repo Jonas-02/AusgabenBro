@@ -1,0 +1,55 @@
+.liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Zeile wie Figma 11:72, Trennlinie 1 px in #1E1E1E. */
+.zeile {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--c-bg);
+}
+
+.zeile:last-child {
+  border-bottom: 0;
+}
+
+.inhalt {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+  padding-right: 4px;
+}
+
+.links {
+  flex: 1;
+}
+
+.titel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ordnung {
+  display: flex;
+  flex: none;
+}
+
+/* 40 x Zeilenhoehe (>= 49 px): Tippflaeche gross genug, Liste bleibt ruhig. */
+.pfeil {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  color: var(--c-inactive);
+}
+
+.pfeil:disabled {
+  opacity: 0.3;
+}
+
+.pfeil:active:not(:disabled) {
+  color: var(--c-text);
+}

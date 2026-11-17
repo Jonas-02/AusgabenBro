@@ -70,4 +70,35 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
     await page.locator('dialog[open]').getByRole('heading').click(); // Fokus aus dem Feld, Tastatur zu
     await foto(page, info.project.name, '12-62_fixkosten-sheet');
   });
+
+  test.describe('Abgeleitete Screens', () => {
+    test('Onboarding', async ({ page }, info) => {
+      await vorbereiten(page, { daten: null });
+      await page.goto('./');
+      await page.getByLabel('wie heißt du?').fill('Jonas');
+      await page.locator('main').click({ position: { x: 5, y: 5 } });
+      await foto(page, info.project.name, 'abgeleitet_onboarding-1');
+      await page.getByRole('button', { name: 'Weiter' }).click();
+      await foto(page, info.project.name, 'abgeleitet_onboarding-2');
+      await page.getByRole('button', { name: 'Weiter' }).click();
+      await foto(page, info.project.name, 'abgeleitet_onboarding-3');
+    });
+
+    test('Pot-Verlauf', async ({ page }, info) => {
+      await vorbereiten(page);
+      await page.goto('./#/budget');
+      await page.getByRole('button', { name: /Drogen: Ausgaben ansehen/ }).click();
+      await foto(page, info.project.name, 'abgeleitet_pot-verlauf');
+    });
+
+    test('Einstellungen', async ({ page }, info) => {
+      await vorbereiten(page);
+      await page.goto('./#/einstellungen');
+      await schriftenBereit(page);
+      await page.screenshot({ path: `${ORDNER}/${info.project.name}/abgeleitet_einstellungen.png`, fullPage: true, animations: 'disabled' });
+      await page.getByRole('button', { name: /Einkauf und Haushalt/ }).first().click();
+      await sheetOffen(page);
+      await foto(page, info.project.name, 'abgeleitet_pot-sheet');
+    });
+  });
 });

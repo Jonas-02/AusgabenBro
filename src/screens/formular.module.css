@@ -1,3 +1,7 @@
+/* Gemeinsame Formular-Bausteine der Sheets und abgeleiteten Screens.
+   Herkunft: Figma 7:4 (Frage, Chips, Speichern) und 12:187 (Betragsfeld,
+   Textfeld, Auswahlzeile). */
+
 /* Figma 12:196: Betrag in Momo 56 und "€" in 35 %, gemeinsame Grundlinie.
    Das native Feld liegt ueber einem unsichtbaren Spiegeltext, damit es genau
    so breit ist wie die Zahl und das "€" direkt dahinter steht. */
@@ -123,23 +127,50 @@
   gap: 8px;
 }
 
-.symbole {
+/* Figma 7:117: Frage ueber einer Auswahl, Manjari 12 in 60 %. */
+.frage {
+  color: var(--c-text-2);
+  font-size: 12px;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.symbol {
+/* Figma 7:184: Speichern, Hoehe 52, blau. */
+.cta {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 100%;
+  height: 52px;
   border-radius: var(--r-card);
-  background: var(--c-bg);
-  color: var(--c-text);
-}
-
-.symbolAktiv {
   background: var(--c-accent);
   color: var(--c-bg);
+  font-size: 17px;
+  line-height: normal;
+  transition: filter 120ms;
+}
+
+.cta:active {
+  filter: brightness(0.92);
+}
+
+.cta > span {
+  transform: translateY(1px);
+}
+
+/* Abgeleitet: Loeschen in Orange, nur beim Bearbeiten. */
+.loeschen {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 16px;
+  color: var(--c-minus);
+  font-size: 15px;
+  line-height: normal;
 }
