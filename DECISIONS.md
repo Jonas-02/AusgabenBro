@@ -203,6 +203,17 @@ Ersetzen, was die Datei enthält. Im Onboarding gibt es „Ich habe eine
 Sicherung" für den Gerätewechsel. `navigator.storage.persist()` wird beim
 Abschluss des Onboardings angefragt (bzw. nach einem Import).
 
+### Tagesspruch statt Motto
+Nachträglicher Wunsch: Unter „Hallo {Name}," steht standardmäßig ein
+täglich wechselnder Spruch (47 Stück in `src/inhalt/sprueche.ts`, bewusst
+derb). In den Einstellungen lässt sich auf das eigene Motto zurückschalten.
+Der Spruch wechselt um Mitternacht und bleibt den Tag über gleich; jede Runde
+zeigt jeden Spruch einmal, in fester Zufallsreihenfolge, ohne Wiederholung
+an zwei Tagen hintereinander (`src/domain/tagesspruch.ts`). Figma zeigt eine
+Zeile; Sprüche dürfen zwei Zeilen haben, ein E2E-Test prüft das für alle bei
+393 px. Neues Feld `tagesspruch` → Schema-Version 2; ältere Daten und
+Sicherungen werden migriert und bekommen den Spruch eingeschaltet.
+
 ### Texte aus dem Figma
 „a month" und „daily" bleiben englisch, wie im Figma. Das Start-Motto ist
 der Figma-Text und in den Einstellungen änderbar.

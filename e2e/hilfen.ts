@@ -23,6 +23,8 @@ export function figmaDaten() {
     onboardingFertig: true,
     name: 'Jonas',
     motto: 'Hör auf dir Zigaretten zu kaufen',
+    // Figma zeigt das Motto, nicht den Tagesspruch.
+    tagesspruch: false,
     zahltag: 1,
     uebertrag: 'reset',
     pots: [
@@ -73,7 +75,7 @@ export async function vorbereiten(page: Page, { daten = figmaDaten(), homeIndika
   await page.addInitScript(
     ({ zustand, indikator }) => {
       if (zustand && !sessionStorage.getItem('vorbereitet')) {
-        localStorage.setItem('ausgabenbro', JSON.stringify({ state: zustand, version: 1 }));
+        localStorage.setItem('ausgabenbro', JSON.stringify({ state: zustand, version: 2 }));
         sessionStorage.setItem('vorbereitet', 'ja');
       }
       if (indikator) {

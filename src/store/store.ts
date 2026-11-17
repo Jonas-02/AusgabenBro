@@ -15,7 +15,7 @@ export interface PotEntwurf {
 
 interface Aktionen {
   onboardingAbschliessen(name: string, zahltag: number, pots: PotEntwurf[]): void;
-  profilSetzen(teil: Partial<Pick<Daten, 'name' | 'motto' | 'zahltag'>> & { uebertrag?: Uebertrag }): void;
+  profilSetzen(teil: Partial<Pick<Daten, 'name' | 'motto' | 'tagesspruch' | 'zahltag'>> & { uebertrag?: Uebertrag }): void;
 
   ausgabeHinzufuegen(potId: string, cent: Cent, datum?: Tag): string;
   ausgabeAendern(id: string, teil: { potId: string; cent: Cent }): void;
@@ -45,8 +45,8 @@ function neueId(): string {
 }
 
 function datenAus(s: Store): Daten {
-  const { onboardingFertig, name, motto, zahltag, uebertrag, pots, ausgaben, letzterPot, fixkosten, kategorien } = s;
-  return { onboardingFertig, name, motto, zahltag, uebertrag, pots, ausgaben, letzterPot, fixkosten, kategorien };
+  const { onboardingFertig, name, motto, tagesspruch, zahltag, uebertrag, pots, ausgaben, letzterPot, fixkosten, kategorien } = s;
+  return { onboardingFertig, name, motto, tagesspruch, zahltag, uebertrag, pots, ausgaben, letzterPot, fixkosten, kategorien };
 }
 
 /**
@@ -88,6 +88,7 @@ export const useStore = create<Store>()(
         set((s) => ({
           name: teil.name ?? s.name,
           motto: teil.motto ?? s.motto,
+          tagesspruch: teil.tagesspruch ?? s.tagesspruch,
           zahltag: teil.zahltag ?? s.zahltag,
           uebertrag: teil.uebertrag ?? s.uebertrag
         }));

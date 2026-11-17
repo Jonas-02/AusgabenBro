@@ -6,12 +6,14 @@ import type { Ausgabe, Fixkosten, Kategorie, Pot, Rhythmus, Uebertrag } from '..
  * Gespeicherter Zustand. Jede Strukturaenderung erhoeht SCHEMA_VERSION und
  * bekommt einen Schritt in `migriere`.
  */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface Daten {
   onboardingFertig: boolean;
   name: string;
   motto: string;
+  /** Unter dem Namen: taeglich wechselnder Spruch statt des eigenen Mottos. Seit Version 2. */
+  tagesspruch: boolean;
   zahltag: number;
   uebertrag: Uebertrag;
   pots: Pot[];
@@ -31,8 +33,8 @@ export interface Exportdatei {
 /** Ueberfuehrt aeltere gespeicherte Staende in die aktuelle Struktur. */
 export function migriere(gespeichert: unknown, vonVersion: number): Daten {
   let stand = gespeichert as Record<string, unknown>;
-  // Version 0 gab es nie oeffentlich; hier stuenden kuenftige Schritte:
-  // if (vonVersion < 2) stand = { ...stand, neuesFeld: standardwert };
+  // Version 2: Tagesspruch, fuer bestehende Daten eingeschaltet.
+  if (vonVersion < 2 && stand && typeof stand === 'object' && !('tagesspruch' in stand)) stand = { ...stand, tagesspruch: true };
   if (vonVersion > SCHEMA_VERSION) {
     throw new Error(`Daten stammen aus einer neueren App-Version (${vonVersion}).`);
   }
@@ -88,6 +90,7 @@ export function pruefe(x: unknown): Ergebnis {
   if (!d || typeof d !== 'object') return { ok: false, fehler: 'Keine gültigen Daten.' };
   if (typeof d.onboardingFertig !== 'boolean') return { ok: false, fehler: 'Feld „onboardingFertig" fehlt.' };
   if (!istText(d.name) || !istText(d.motto)) return { ok: false, fehler: 'Name oder Motto fehlen.' };
+  if (typeof d.tagesspruch !== 'boolean') return { ok: false, fehler: 'Feld „tagesspruch" fehlt.' };
   if (!istGanzzahl(d.zahltag, 1, 31)) return { ok: false, fehler: 'Zahltag muss zwischen 1 und 31 liegen.' };
   if (d.uebertrag !== 'reset' && d.uebertrag !== 'carry') return { ok: false, fehler: 'Übertrag ist ungültig.' };
   if (!Array.isArray(d.pots) || !d.pots.every(pruefePot)) return { ok: false, fehler: 'Ein Pot ist ungültig.' };
@@ -107,6 +110,7 @@ export function pruefe(x: unknown): Ergebnis {
       onboardingFertig: d.onboardingFertig,
       name: d.name,
       motto: d.motto,
+      tagesspruch: d.tagesspruch,
       zahltag: d.zahltag,
       uebertrag: d.uebertrag,
       pots: d.pots,

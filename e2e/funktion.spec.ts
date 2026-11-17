@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { vorbereiten } from './hilfen';
+import { vorbereiten, figmaDaten } from './hilfen';
+import { spruchIndex } from '../src/domain/tagesspruch';
+import { SPRUECHE } from '../src/inhalt/sprueche';
 
 /**
  * Funktionstests zu den Abnahmekriterien (Prompt, Abschnitt 8). Ausgangslage
@@ -447,3 +449,56 @@ test.describe('Große Schrift', () => {
     await expect(page.getByRole('button', { name: 'Ausgabe speichern' })).toBeInViewport();
   });
 });
+
+test.describe('Tagesspruch', () => {
+  const spruchAm = (tag: string) => SPRUECHE[spruchIndex(tag, SPRUECHE.length)] as string;
+  const unterzeile = (page: Page) => page.locator('main h1 [class*="_unter_"]');
+
+  test('jeder Spruch passt in höchstens zwei Zeilen', async ({ page }) => {
+    await vorbereiten(page, { daten: { ...figmaDaten(), tagesspruch: true } });
+    await page.goto('./#/budget');
+    await page.evaluate(() => document.fonts.ready);
+    const zuLang = await unterzeile(page).evaluate((el, liste) => {
+      el.textContent = 'X';
+      const zeile = el.getBoundingClientRect().height;
+      const lang: string[] = [];
+      for (const t of liste) {
+        el.textContent = t;
+        if (el.getBoundingClientRect().height > zeile * 2 + 1) lang.push(t);
+      }
+      return lang;
+    }, SPRUECHE as string[]);
+    expect(zuLang).toEqual([]);
+  });
+
+  test('Einstellungen schalten zwischen Spruch und Motto, um Mitternacht kommt ein neuer', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/budget');
+    await expect(unterzeile(page)).toHaveText('Hör auf dir Zigaretten zu kaufen');
+
+    await page.getByRole('link', { name: 'Einstellungen' }).click();
+    await page.getByRole('button', { name: 'täglicher Spruch' }).click();
+    await expect(page.getByLabel('dein Motto')).toHaveCount(0);
+    await page.getByRole('link', { name: 'Budget' }).first().click();
+    await expect(unterzeile(page)).toHaveText(spruchAm('2026-11-17'));
+
+    await page.reload();
+    await expect(unterzeile(page)).toHaveText(spruchAm('2026-11-17'));
+
+    await page.clock.setFixedTime(new Date('2026-11-18T00:00:05'));
+    await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+    await expect(unterzeile(page)).toHaveText(spruchAm('2026-11-18'));
+    expect(spruchAm('2026-11-18')).not.toBe(spruchAm('2026-11-17'));
+  });
+
+  test('neue Nutzer bekommen den Spruch', async ({ page }) => {
+    await vorbereiten(page, { daten: null });
+    await page.goto('./');
+    await page.getByLabel('wie heißt du?').fill('Jonas');
+    await page.getByRole('button', { name: 'Weiter' }).click();
+    await page.getByRole('button', { name: 'Weiter' }).click();
+    await page.getByRole('button', { name: 'Los geht’s' }).click();
+    await expect(unterzeile(page)).toHaveText(spruchAm('2026-11-17'));
+  });
+});
+

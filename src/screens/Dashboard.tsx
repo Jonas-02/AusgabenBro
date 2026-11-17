@@ -9,6 +9,8 @@ import { Icon, istSymbol } from '../ui/Icon';
 import { navigiere } from '../hooks/useRoute';
 import { MonatTagMeta } from './Meta';
 import { euro } from '../domain/geld';
+import { spruchIndex } from '../domain/tagesspruch';
+import { SPRUECHE } from '../inhalt/sprueche';
 import s from './seite.module.css';
 import d from './Dashboard.module.css';
 
@@ -16,6 +18,8 @@ import d from './Dashboard.module.css';
 export function Dashboard({ heute }: { heute: string }) {
   const name = useStore((x) => x.name);
   const motto = useStore((x) => x.motto);
+  const tagesspruch = useStore((x) => x.tagesspruch);
+  const unterzeile = tagesspruch ? SPRUECHE[spruchIndex(heute, SPRUECHE.length)] : motto;
   const pots = useStore((x) => x.pots);
   const ausgaben = useStore((x) => x.ausgaben);
   const zahltag = useStore((x) => x.zahltag);
@@ -32,7 +36,7 @@ export function Dashboard({ heute }: { heute: string }) {
       <div className={s.kopfbereich}>
         <h1 className={s.gruss}>
           {name ? `Hallo ${name},` : 'Hallo,'}
-          {motto && <span className={s.unter}>{motto}</span>}
+          {unterzeile && <span className={s.unter}>{unterzeile}</span>}
         </h1>
         <a className={s.zahnrad} href="#/einstellungen" aria-label="Einstellungen">
           <Icon name="settings" />

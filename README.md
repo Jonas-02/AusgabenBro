@@ -6,6 +6,10 @@ Monat) füllt sich jeden Tag ein Stück. Du siehst also nicht, was vom Monat
 zeigt die App, wann der Pot wieder im Plus ist. Fixkosten laufen getrennt
 davon.
 
+Unter der Begrüßung steht jeden Tag ein neuer Spruch, der dich fürs
+Geldausgeben auslacht. Wer's netter mag, schaltet in den Einstellungen auf
+ein eigenes Motto um.
+
 Läuft komplett im Browser, ohne Konto und ohne Server. Die Daten bleiben auf
 dem Gerät.
 

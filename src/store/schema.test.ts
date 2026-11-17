@@ -37,6 +37,22 @@ describe('Schema', () => {
     expect(r.ok && r.daten.letzterPot).toBe(null);
   });
 
+  it('Version 1 bekommt den Tagesspruch eingeschaltet', () => {
+    const { tagesspruch: _weg, ...v1 } = gueltig();
+    const d = migriere(v1, 1);
+    expect(d.tagesspruch).toBe(true);
+    expect(d.motto).toBe(v1.motto);
+  });
+
+  it('Version 2 behaelt die Wahl', () => {
+    expect(migriere({ ...gueltig(), tagesspruch: false }, 2).tagesspruch).toBe(false);
+  });
+
+  it('lehnt Daten ohne Tagesspruch-Feld ab', () => {
+    const { tagesspruch: _weg, ...ohne } = gueltig();
+    expect(pruefe(ohne).ok).toBe(false);
+  });
+
   it('Export und Import ergeben dieselben Daten', () => {
     const datei = { app: 'ausgabenbro', version: SCHEMA_VERSION, exportiertAm: 'x', daten: gueltig() };
     const r = leseExport(JSON.stringify(datei));

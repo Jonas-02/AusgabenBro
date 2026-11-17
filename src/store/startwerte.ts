@@ -24,6 +24,7 @@ export function leereDaten(): Daten {
     onboardingFertig: false,
     name: '',
     motto: START_MOTTO,
+    tagesspruch: true,
     zahltag: 1,
     uebertrag: 'reset',
     pots: [],

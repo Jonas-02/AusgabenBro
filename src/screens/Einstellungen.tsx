@@ -114,20 +114,31 @@ export function Einstellungen({ heute, zeigeToast }: Props) {
             />
           </div>
           <div className={f.feldGruppe}>
-            <label className={f.frage} htmlFor={ids.motto}>
-              dein Motto
-            </label>
-            <input
-              id={ids.motto}
-              className={f.feld}
-              type="text"
-              autoComplete="off"
-              enterKeyHint="done"
-              maxLength={60}
-              value={st.motto}
-              onChange={(ev) => st.profilSetzen({ motto: ev.target.value })}
-            />
+            <p className={f.frage}>unter deinem Namen</p>
+            <div className={f.chips}>
+              <Chip label="täglicher Spruch" aktiv={st.tagesspruch} onClick={() => st.profilSetzen({ tagesspruch: true })} />
+              <Chip label="eigenes Motto" aktiv={!st.tagesspruch} onClick={() => st.profilSetzen({ tagesspruch: false })} />
+            </div>
           </div>
+          {st.tagesspruch ? (
+            <p className={e.hinweis}>Jeden Tag ein neuer Spruch. Nett ist anders.</p>
+          ) : (
+            <div className={f.feldGruppe}>
+              <label className={f.frage} htmlFor={ids.motto}>
+                dein Motto
+              </label>
+              <input
+                id={ids.motto}
+                className={f.feld}
+                type="text"
+                autoComplete="off"
+                enterKeyHint="done"
+                maxLength={60}
+                value={st.motto}
+                onChange={(ev) => st.profilSetzen({ motto: ev.target.value })}
+              />
+            </div>
+          )}
           <ZahltagAuswahl wert={st.zahltag} onWahl={(z) => st.profilSetzen({ zahltag: z })} />
           <p className={e.hinweis}>An diesem Tag beginnt dein Budget-Monat. Gibt es den Tag nicht, zählt der letzte Tag des Monats.</p>
         </Karte>
