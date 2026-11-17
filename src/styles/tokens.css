@@ -1,0 +1,43 @@
+/* Design-Tokens aus Figma avEMvPMNo2Yoy2zJaeIEml.
+   Abweichungen von der Spezifikation sind in DECISIONS.md begruendet. */
+
+:root {
+  /* Farben */
+  --c-bg: #1e1e1e;
+  --c-card: #252525;
+  --c-accent: #6598e4;
+  --c-accent-45: rgba(101, 152, 228, 0.45);
+  --c-light: #dedede;
+  --c-minus: #f59e6f;
+  --c-text: #ffffff;
+  --c-text-2: rgba(255, 255, 255, 0.6);
+  --c-text-35: rgba(255, 255, 255, 0.35);
+  --c-inactive: #9d9d9d;           /* inaktiver Tab, "Neue Kategorie" */
+  --c-handle: rgba(222, 222, 222, 0.3);
+  --c-scrim: rgba(0, 0, 0, 0.6);
+  --c-shadow-fab: rgba(0, 0, 0, 0.4);
+
+  /* Schriften: Manjari fuer Text, Momo Trust Display fuer Zahlen */
+  --f-text: 'Manjari', system-ui, -apple-system, sans-serif;
+  --f-num: 'Momo Trust Display', system-ui, -apple-system, sans-serif;
+  --ls-text: -0.07em;
+  --ls-num: -0.13em;
+
+  /* Radien */
+  --r-card: 4px;
+  --r-sheet: 12px;
+  --r-pill: 14px;
+
+  /* Abstaende */
+  --page-x: 28px;
+  --page-top: 32px;
+  --sheet-x: 20px;
+
+  /* Feste Hoehen */
+  --tabbar-h: 49px;                /* 83px in Figma inkl. 34px Home-Indikator */
+  --fab-gap: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: dark;
+}

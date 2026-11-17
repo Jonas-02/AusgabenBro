@@ -1,0 +1,35 @@
+{
+  "name": "ausgabenbro",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Mobile Budget-App mit täglich befüllten Pots",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.app.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "icons": "node scripts/app-icons.mjs"
+  },
+  "dependencies": {
+    "@fontsource/manjari": "^5.3.0",
+    "@fontsource/momo-trust-display": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.0"
+  }
+}
