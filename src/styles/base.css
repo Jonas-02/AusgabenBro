@@ -29,6 +29,17 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Keine Scrollbalken, weder auf der Seite noch im Sheet. Scrollen geht
+   weiter per Wischen, Mausrad und Tastatur. scrollbar-width fuer Safari ab
+   18.2 und Chromium, ::-webkit-scrollbar fuer aeltere WebKit-Versionen. */
+:where(*) {
+  scrollbar-width: none;
+}
+
+:where(*)::-webkit-scrollbar {
+  display: none;
+}
+
 /* Solange ein Sheet offen ist, scrollt die Seite dahinter nicht. */
 html.sheet-offen,
 html.sheet-offen body {

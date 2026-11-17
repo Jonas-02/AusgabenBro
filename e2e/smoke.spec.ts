@@ -31,3 +31,17 @@ test('Erster Start zeigt das Onboarding', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Hallo,');
   await expect(page.getByLabel('wie heißt du?')).toBeVisible();
 });
+
+test('keine Scrollbalken, Scrollen geht trotzdem', async ({ page }) => {
+  await vorbereiten(page);
+  await page.goto('./#/fixkosten');
+  const seite = await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarWidth);
+  expect(seite).toBe('none');
+  await page.mouse.wheel(0, 400);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+
+  await page.getByRole('button', { name: 'Fixkosten hinzufügen' }).click();
+  await page.locator('dialog[data-zustand="offen"]').waitFor();
+  const sheet = await page.locator('dialog[open] [class*="_inhalt_"]').evaluate((e) => getComputedStyle(e).scrollbarWidth);
+  expect(sheet).toBe('none');
+});
