@@ -131,7 +131,11 @@ Momo 14 px sind das 1,82 px pro Textbox. Wo die Breite einer Box zählt
 ### Gemischte Schriften in einer Zeile
 Manjari und Momo haben unterschiedliche Ober- und Unterlängen. In einer
 gemischten Zeile („du hast 380,32 € von 425 € ausgegeben") wächst die
-Zeilenbox dadurch auf 18 statt 16 px. Solche Zeilen haben eine feste Höhe.
+Zeilenbox dadurch auf 18 statt 16 px. Kurze Zeilen (Meta-Spalte, Statuszeile)
+haben deshalb eine feste Höhe. Der Satz in der Hauptkarte muss bei großer
+Schrift umbrechen dürfen; dort tragen die Momo-Zahlen `line-height: 0` und
+damit nichts zur Zeilenhöhe bei. Ergebnis: 16 px wie im Figma, mehrzeilig
+wenn nötig.
 
 ### Textbreiten
 Die Abnahme in `e2e/masse.spec.ts` prüft Positionen und Höhen auf 1 px.
@@ -147,3 +151,102 @@ Cursor. Nicht im Figma; ohne Platzhalter stünde nur „| €".
 Ein Toast außerhalb des `<dialog>` liegt unter dem Top Layer und wäre nicht
 sichtbar. Der Hinweis erscheint deshalb 1,6 Sekunden lang als Beschriftung
 des Speichern-Buttons. Die Höhe des Sheets bleibt dabei gleich.
+
+## Abgeleitete Screens
+
+Nicht im Figma, aus dessen Formensprache gebaut. Neue Farben, Schriften oder
+Radien gibt es nicht.
+
+| Screen | Woraus abgeleitet |
+| --- | --- |
+| Pot-Verlauf (`#/pot/:id`) | Seitenkopf und Hauptkarte aus Dashboard `1:2`, Liste aus Fixkosten `11:72`. Zeigt die Ausgaben des laufenden Zyklus, neueste oben. Tipp öffnet das Ausgaben-Sheet im Bearbeiten-Modus. |
+| Ausgabe bearbeiten | Ausgaben-Sheet `7:4` mit Titel „Ausgabe bearbeiten", Knopf „Änderung speichern" und orangem „Löschen" darunter. |
+| Fixkosten bearbeiten | Fixkosten-Sheet `12:187`, vorbelegt, mit „Löschen". |
+| Einstellungen (`#/einstellungen`) | Abschnitte wie „Deine Pots" `1:2`, Felder und Auswahlzeile aus `12:187`, Chips aus `7:4`, Listenzeilen aus `11:72`. |
+| Pot anlegen/bearbeiten | Sheet nach `12:187`: großer Betrag, Textfeld, Symbolwahl, Speichern, Löschen. |
+| Symbolwahl | Quadratische Flächen im Stil der Chips, aktiv in Akzentblau. Echte Radio-Buttons (Pfeiltasten, Screenreader). |
+| Rückfrage (Import, Alles löschen) | Bottom Sheet mit Text, Hauptknopf `7:184` (bei „Alles löschen" in `#F59E6F`) und „Abbrechen". |
+| Onboarding | Drei Schritte mit Fortschrittsstrichen in Balkenfarben: Name und Zahltag, Pots (vorbelegt mit den Figma-Werten), Home-Bildschirm-Hinweis. |
+| Toast „Gespeichert · Rückgängig" | Kartenfläche mit Akzentfarbe für die Aktion, über dem FAB. |
+| Zurück-Link | Akzentblau wie das Motto, Chevron um 90° gedreht. |
+
+### Löschen und Rückgängig
+Ausgaben, Fixkosten und Pots werden sofort gelöscht, der Toast bietet
+5 Sekunden lang „Rückgängig". Ein Pot nimmt seine Ausgaben mit (sonst hingen
+sie an keinem Pot mehr); „Rückgängig" stellt beides an alter Stelle wieder
+her. Nur „Alle Daten löschen" und „Importieren" fragen vorher nach, weil sie
+alles ersetzen. Beide lassen sich danach trotzdem 8 bzw. 5 Sekunden lang
+rückgängig machen.
+
+### Pot mitten im Zyklus anlegen
+Die Formel aus 3.3 rechnet ab Zyklusbeginn. Ein am 17. angelegter Pot hat
+damit sofort 17/30 seines Monatsbetrags. Das passt zum Onboarding (der
+Monat läuft ja schon) und hält die Formel einfach. Im Modus `carry` zählt der
+Übertrag erst ab dem Anlage-Zyklus.
+
+### Datensicherung
+Export erzeugt `ausgabenbro-JJJJ-MM-TT.json`. Auf dem iPhone öffnet sich das
+Teilen-Menü („In Dateien sichern"), weil ein Download-Link in einer
+Home-Bildschirm-App nicht zuverlässig funktioniert; andere Browser laden die
+Datei herunter. Import prüft Format, Version und Verweise und zeigt vor dem
+Ersetzen, was die Datei enthält. Im Onboarding gibt es „Ich habe eine
+Sicherung" für den Gerätewechsel. `navigator.storage.persist()` wird beim
+Abschluss des Onboardings angefragt (bzw. nach einem Import).
+
+### Texte aus dem Figma
+„a month" und „daily" bleiben englisch, wie im Figma. Das Start-Motto ist
+der Figma-Text und in den Einstellungen änderbar.
+
+## Barrierefreiheit
+
+### Kontraste (WCAG 2.1, berechnet mit den Token-Farben)
+
+| Vordergrund | auf Karte `#252525` | auf Hintergrund `#1E1E1E` |
+| --- | --- | --- |
+| Weiß | 15,3:1 | 16,7:1 |
+| Weiß 60 % | 6,5:1 | 6,8:1 |
+| Akzent `#6598E4` | 5,2:1 | 5,7:1 |
+| Minus `#F59E6F` | 7,3:1 | 7,9:1 |
+| Inaktiv `#9D9D9D` | 5,7:1 | 6,2:1 |
+| `#1E1E1E` auf Akzent (Knöpfe, aktive Chips) | 5,7:1 | |
+| Weiß 35 % | 3,1:1 | 3,2:1 |
+
+Alles über 4,5:1 bis auf Weiß 35 %. Das steht im Figma nur für „€" und die
+leere „0" im großen Betrag (56 px, große Schrift, Grenze 3:1, erfüllt).
+Platzhalter in Textfeldern (16 px) sind deshalb abweichend 60 % statt 35 %.
+
+### Laufweite unter 14 px bleibt bei −7 %
+Die Spezifikation erlaubt 0 statt −7 % für Text unter 14 px, „sofern das die
+Optik nicht spürbar verändert". Es verändert sie spürbar: −7 % sind bei 11 px
+0,77 px je Zeichen, bei 12 px 0,84 px. „am 20. · in 3 Tagen" würde 15 px
+breiter, „du hast 105 € von 85 € ausgegeben" rund 20 px. Damit stimmen Chips,
+Zeilen und Umbrüche nicht mehr mit Figma überein. Die Bedingung ist nicht
+erfüllt, die Laufweite bleibt. Belegt ist, dass etwas weitere Laufweite das
+Worterkennen leicht beschleunigt (Perea, Moret-Tatay & Gómez 2011, Acta
+Psychologica 137); der Effekt liegt im Bereich weniger Millisekunden. Die
+Umstellung wäre eine Zeile in `src/styles/base.css`.
+
+### Screenreader
+Beträge haben einen unsichtbaren, korrekt formatierten Text („76,43 €"),
+die sichtbaren Einzel-Spans sind `aria-hidden`. Pot-Karten nennen Namen und
+Stand („Drogen: -20 € im Minus. Ausgaben ansehen"). Betrag und Vorschau im
+Sheet sind `aria-live="polite"`. Die Rücktaste im Zahlenfeld heißt „Letzte
+Ziffer löschen", damit sie nicht mit „Löschen" (Ausgabe löschen) verwechselt
+wird. Nach jedem Onboarding-Schritt springt der Fokus auf die neue
+Überschrift.
+
+## Große Schrift
+
+Die App nutzt feste Pixelgrößen wie Figma. iOS-Dynamic-Type wirkt in Safari
+nur auf Seiten mit Systemschrift-Schlüsselwörtern, hier also nicht. Was
+wirkt, ist der Safari-Seitenzoom (aA). 150 % entsprechen 262 CSS-Pixeln
+Breite; so testen `e2e/funktion.spec.ts` (kein seitliches Überlaufen) und
+`e2e/visuell.spec.ts` (Screenshots `gross_*`). Dafür dürfen Kartenköpfe,
+der Satz in der Hauptkarte und Namen in Listen umbrechen, und Inhalte im
+Sheet schrumpfen nicht mehr, wenn das Sheet scrollt. Bei 393 px ändert sich
+dadurch nichts (Maße-Test grün).
+
+Bewusst gekürzt mit „…" bleibt der Pot-Name in „danach in …" im
+Ausgaben-Sheet: Würde er umbrechen, änderte sich die Sheet-Höhe beim
+Wechseln des Pots. Der volle Name steht im gewählten Chip direkt darüber.
+

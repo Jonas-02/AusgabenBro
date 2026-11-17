@@ -74,8 +74,9 @@
   appearance: none;
 }
 
+/* 60 % statt 35 %: Platzhalter sind Text und brauchen 4,5:1 (6,5:1). */
 .feld::placeholder {
-  color: var(--c-text-35);
+  color: var(--c-text-2);
 }
 
 .feld:focus-visible {

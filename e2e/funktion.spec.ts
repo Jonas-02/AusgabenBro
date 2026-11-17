@@ -310,8 +310,7 @@ test.describe('Zeit und Daten', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0);
   });
 
-  test('funktioniert offline', async ({ page, context, browserName }) => {
-    test.skip(browserName === 'webkit' && process.platform === 'linux', 'Playwright-WebKit unter Linux hat keine Service Worker');
+  test('funktioniert offline', async ({ page, context }) => {
     await vorbereiten(page);
     await page.goto('./#/budget');
     await page.waitForFunction(() => navigator.serviceWorker?.controller !== null && navigator.serviceWorker?.controller !== undefined, null, {
