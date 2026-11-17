@@ -1,0 +1,64 @@
+.halter {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--tabbar-h) + var(--safe-bottom) + var(--fab-gap));
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Ueber dem FAB (46 px hoch + 12 px Luft), damit er frei bleibt. */
+.ueberFab {
+  bottom: calc(var(--tabbar-h) + var(--safe-bottom) + var(--fab-gap) + 58px);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: var(--r-card);
+  background: var(--c-card);
+  border: 1px solid var(--c-bg);
+  filter: drop-shadow(0 4px 8px var(--c-shadow-fab));
+  font-size: 15px;
+  line-height: normal;
+  pointer-events: auto;
+  animation: rein 200ms ease-out;
+}
+
+.punkt {
+  color: var(--c-text-2);
+}
+
+.aktion {
+  position: relative;
+  color: var(--c-accent);
+}
+
+.aktion::before {
+  content: '';
+  position: absolute;
+  inset: -12px -8px;
+}
+
+@keyframes rein {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation-name: einblenden;
+  }
+}
+
+@keyframes einblenden {
+  from {
+    opacity: 0;
+  }
+}

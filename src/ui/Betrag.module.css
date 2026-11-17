@@ -1,0 +1,11 @@
+.betrag {
+  font-family: var(--f-num);
+  letter-spacing: var(--ls-num);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* Ersatz fuer das Leerzeichen, das Figma vor das Komma setzt. */
+.kommaLuft {
+  margin-left: 0.11em;
+}

@@ -79,11 +79,6 @@ h3 {
   border: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
-  }
-}
+/* Reduzierte Bewegung regelt jede Komponente selbst: das Sheet soll dann
+   noch einblenden, nur nicht hochfahren. Eine pauschale Regel hier haette
+   auch das Einblenden abgeschaltet. */

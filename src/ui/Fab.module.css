@@ -1,0 +1,25 @@
+.fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--tabbar-h) + var(--safe-bottom) + var(--fab-gap));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 16px 14px 14px;
+  border-radius: var(--r-card);
+  background: var(--c-accent);
+  color: var(--c-bg);
+  filter: drop-shadow(0 4px 8px var(--c-shadow-fab));
+  transition: transform 120ms;
+}
+
+.fab:active {
+  transform: scale(0.97);
+}
+
+.label {
+  font-size: 15px;
+  line-height: normal;
+  transform: translateY(1px);
+}

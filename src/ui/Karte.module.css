@@ -1,0 +1,19 @@
+.karte {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: var(--c-card);
+  border: 1px solid var(--c-bg);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  text-align: left;
+}
+
+/* Gedrueckt-Zustand: nicht im Figma, ohne neue Farbe abgeleitet. */
+.klickbar {
+  transition: filter 120ms;
+}
+
+.klickbar:active {
+  filter: brightness(1.12);
+}

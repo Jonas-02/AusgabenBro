@@ -1,0 +1,34 @@
+/* Figma: Hoehe 83 = 8 oben + 41 Inhalt + 34 Home-Indikator. */
+.leiste {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  height: calc(var(--tabbar-h) + var(--safe-bottom));
+  padding: 8px 0 var(--safe-bottom);
+  background: var(--c-card);
+}
+
+.tab {
+  flex: 1 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  color: var(--c-inactive);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab[aria-current='page'] {
+  color: var(--c-accent);
+}
+
+.label {
+  font-size: 11px;
+  line-height: normal;
+}

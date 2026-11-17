@@ -1,0 +1,40 @@
+/* Figma 7:111 / 12:206: pl 10 pr 12 py 8 mit Icon, px 12 ohne. */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-size: 12px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.mitIcon {
+  padding-left: 10px;
+}
+
+.aktiv {
+  background: var(--c-accent);
+  color: var(--c-bg);
+}
+
+.gedimmt {
+  color: var(--c-inactive);
+}
+
+.label {
+  /* Manjari sitzt optisch hoch; Figma zeigt das Label auf Iconmitte. */
+  transform: translateY(1px);
+}
+
+/* Groessere Trefferflaeche ohne sichtbare Aenderung. Vertikal nur 4 px,
+   damit sich umbrechende Zeilen (Abstand 8 px) nicht ueberlappen. */
+.chip::before {
+  content: '';
+  position: absolute;
+  inset: -4px -2px;
+}

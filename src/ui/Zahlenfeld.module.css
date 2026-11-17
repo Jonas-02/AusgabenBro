@@ -1,0 +1,63 @@
+.feld {
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.reihe {
+  display: flex;
+}
+
+/* Figma 7:2: Hoehe 50, Momo 25, weiss. */
+.taste {
+  flex: 1 0 0;
+  min-width: 0;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-card);
+  color: var(--c-text);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 80ms;
+}
+
+.taste:active {
+  background: var(--c-bg);
+}
+
+.ziffer {
+  font-family: var(--f-num);
+  font-size: 25px;
+  letter-spacing: var(--ls-num);
+  line-height: normal;
+}
+
+/* Figma 10:56: bg #1E1E1E, px 12, py 8, Momo 14. */
+.schnell {
+  position: relative;
+  padding: 8px 12px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--f-num);
+  font-size: 14px;
+  letter-spacing: var(--ls-num);
+  line-height: normal;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.schnell:active {
+  filter: brightness(1.3);
+}
+
+/* Trefferflaeche 44 px hoch, ohne die Optik zu aendern. */
+.schnell::before {
+  content: '';
+  position: absolute;
+  inset: -7px -4px;
+}
