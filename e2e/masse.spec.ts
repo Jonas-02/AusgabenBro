@@ -44,17 +44,13 @@ test.describe('Masse wie in Figma', () => {
     pruefe(await box(page, 'main [class*="_satz_"]'), { y: 153, h: 16 }, 'Satz 2:11');
     pruefe(await box(page, 'main [class*="_balken_"]', 0), { x: 29, y: 181, w: 335, h: 28 }, 'Balken 2:5');
     pruefe(await box(page, '#pots-titel'), { x: 28, y: 230, h: 19 }, 'Deine Pots 2:32');
-    pruefe(await box(page, 'main [class*="_gruppeLabel_"]', 0), { y: 261, h: 14 }, 'Label 4:51');
 
-    const potKarten = [
-      { y: 279, balken: 333 },
-      { y: 392, balken: 446 },
-      { y: 505, balken: 559 },
-      { y: 618, balken: 672 }
-    ];
-    for (const [i, p] of potKarten.entries()) {
-      pruefe(await box(page, karten, i + 1), { x: 28, y: p.y, w: 337, h: 83 }, `Pot ${i + 1}`);
-      pruefe(await box(page, 'main [class*="_balken_"]', i + 1), { y: p.balken, h: 28 }, `Pot-Balken ${i + 1}`);
+    // Pot-Card v2 (Figma 20:187) statt der Karten aus 1:2: 107 px hoch,
+    // Abstand 12 wie zwischen den Gruppen in 1:2.
+    const potKarten = [261, 380, 499, 618];
+    for (const [i, y] of potKarten.entries()) {
+      pruefe(await box(page, karten, i + 1), { x: 28, y, w: 337, h: 107 }, `Pot ${i + 1} 20:188`);
+      pruefe(await box(page, 'main [class*="_balken_"]', i + 1), { x: 29, y: y + 78, w: 335, h: 28 }, `Pot-Balken ${i + 1} 20:203`);
     }
 
     pruefe(await box(page, 'nav[aria-label="Hauptnavigation"]'), { x: 0, y: 769, w: 393, h: 83 }, 'Tab-Leiste 10:58');
@@ -133,4 +129,30 @@ test.describe('Masse wie in Figma', () => {
     pruefe(await box(page, `${d} label[class*="_auswahl_"]`), { x: 20, y: 712, w: 353, h: 40 }, 'Abbuchungstag 12:244');
     pruefe(await box(page, `${d} [class*="_cta_"]`), { x: 20, y: 766, w: 353, h: 52 }, 'Speichern 12:250');
   });
+
+  test('Pot-Card v2 20:187', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/budget');
+    await schriftenBereit(page);
+    const karte = 'main [class*="_potkarte_"] >> nth=1'; // Drogen, wie im Figma-Frame
+    const k = await box(page, karte);
+    if (!k) throw new Error('Karte fehlt');
+    const rel = async (sel: string, i = 0) => {
+      const b = await box(page, `${karte} >> ${sel}`, i);
+      if (!b) throw new Error(`nicht sichtbar: ${sel}`);
+      return { x: b.x - k.x, y: b.y - k.y, w: b.w, h: b.h };
+    };
+    pruefe(k, { w: 337, h: 107 }, 'Karte 20:188');
+    pruefe(await rel('[class*="_potName_"]'), { x: 13, y: 13, h: 14 }, 'Name-Zeile 20:211');
+    pruefe(await rel('[class*="_potName_"] svg'), { x: 13, y: 13, w: 14, h: 14 }, 'Icon 20:190');
+    pruefe(await rel('[class*="_betrag_"]'), { x: 13, y: 33, h: 33 }, 'Betrag 20:212');
+    // Meta ist rechtsbuendig und so breit wie ihr Text; es zaehlt die rechte Kante (1 + 220 + 97).
+    const meta = await rel('[class*="_meta_"]');
+    pruefe({ x: meta.x + meta.w, y: meta.y, w: 0, h: meta.h }, { x: 318, y: 13, h: 32 }, 'Meta 20:207 rechte Kante', TEXTBREITE);
+    pruefe(await rel('[class*="_balken_"]'), { x: 1, y: 79, w: 335, h: 28 }, 'Balken 20:203');
+    // Minus: gedeckt | Vorgriff, getrennt durch 1 px in Kartenfarbe (20:205)
+    const trenner = await page.locator(`${karte} >> [class*="_trenner_"]`).evaluate((e) => getComputedStyle(e).borderLeftWidth);
+    expect(trenner).toBe('1px');
+  });
 });
+

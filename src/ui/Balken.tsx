@@ -15,20 +15,27 @@ interface Props {
   className?: string | undefined;
 }
 
-/** Gesamtbreite entspricht `daten.skala`; ungenutzter Rest bleibt leer. */
+/**
+ * Gesamtbreite entspricht `daten.skala`; ungenutzter Rest bleibt leer.
+ * Stossen zwei gleichfarbige Segmente aneinander (gedeckt | Vorgriff),
+ * trennt sie eine 1-px-Linie in der Flaechenfarbe (Pot-Card v2, 20:205).
+ */
 export function Balken({ daten, hoehe, className }: Props) {
+  const sichtbar = daten.segmente.filter((s) => s.cent > 0);
   return (
     <div className={[styles.balken, className].filter(Boolean).join(' ')} style={{ height: hoehe }} aria-hidden="true">
-      {daten.segmente.map((s, i) =>
-        s.cent > 0 ? (
+      {sichtbar.map((s, i) => {
+        const vorher = sichtbar[i - 1];
+        const trenner = vorher !== undefined && FARBE[vorher.art] === FARBE[s.art];
+        return (
           <div
             key={i}
-            className={styles.segment}
+            className={[styles.segment, trenner ? styles.trenner : null].filter(Boolean).join(' ')}
             data-art={s.art}
             style={{ width: `${(s.cent / daten.skala) * 100}%`, background: FARBE[s.art] }}
           />
-        ) : null
-      )}
+        );
+      })}
     </div>
   );
 }

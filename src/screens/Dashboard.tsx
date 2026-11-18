@@ -83,24 +83,33 @@ export function StandKarte({ stand }: { stand: Stand }) {
   );
 }
 
+/**
+ * Pot-Card v2 (Figma 20:187): Icon und Name in der Karte, darunter der
+ * Betrag; rechts Monat/Tag; unten der Balken ueber die volle Breite.
+ */
 export function PotKarte({ pot, stand, klickbar = true }: { pot: Pot; stand: PotStand; klickbar?: boolean }) {
   const negativ = stand.stand < 0;
   return (
-    <div className={s.gruppe}>
-      <div className={s.gruppeLabel}>
-        {istSymbol(pot.symbol) && <Icon name={pot.symbol} />}
-        <span>{pot.name}</span>
-      </div>
-      <Karte
-        className={d.potkarte}
-        {...(klickbar ? { onClick: () => navigiere({ seite: 'pot', id: pot.id }), label: `${pot.name}: ${euro(stand.stand)}${negativ ? ' im Minus' : ' übrig'}. Ausgaben ansehen` } : {})}
-      >
-        <div className={s.kartenKopf}>
+    <Karte
+      className={d.potkarte}
+      {...(klickbar
+        ? {
+            onClick: () => navigiere({ seite: 'pot', id: pot.id }),
+            label: `${pot.name}: ${euro(stand.stand)}${negativ ? ' im Minus' : ' übrig'}. Ausgaben ansehen`
+          }
+        : {})}
+    >
+      <div className={d.potKopf}>
+        <div className={d.potLinks}>
+          <div className={d.potName}>
+            {istSymbol(pot.symbol) && <Icon name={pot.symbol} />}
+            <span>{pot.name}</span>
+          </div>
           <Betrag cent={stand.stand} groesse={25} kommaLuft className={negativ ? s.minus : undefined} />
-          <MonatTagMeta monatlich={stand.monatlich} proTag={stand.proTag} />
         </div>
-        <Balken daten={standBalken(stand)} hoehe={28} />
-      </Karte>
-    </div>
+        <MonatTagMeta monatlich={stand.monatlich} proTag={stand.proTag} />
+      </div>
+      <Balken daten={standBalken(stand)} hoehe={28} />
+    </Karte>
   );
 }

@@ -145,5 +145,15 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
       await page.screenshot({ path: `${ORDNER}/${info.project.name}/abgeleitet_analyse-figma.png`, fullPage: true, animations: 'disabled' });
     });
   });
+
+  test.describe('Pot-Card v2', () => {
+    test.use({ deviceScaleFactor: 1 });
+    test('20-187 Pot-Card v2', async ({ page }, info) => {
+      await vorbereiten(page);
+      await page.goto('./#/budget');
+      await schriftenBereit(page);
+      await page.locator('main [class*="_potkarte_"]').nth(1).screenshot({ path: `${ORDNER}/${info.project.name}/20-187_pot-card-v2.png`, animations: 'disabled' });
+    });
+  });
 });
 

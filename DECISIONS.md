@@ -162,6 +162,26 @@ Ein Toast außerhalb des `<dialog>` liegt unter dem Top Layer und wäre nicht
 sichtbar. Der Hinweis erscheint deshalb 1,6 Sekunden lang als Beschriftung
 des Speichern-Buttons. Die Höhe des Sheets bleibt dabei gleich.
 
+## Pot-Card v2 (Figma `20:187`)
+
+Ersetzt die Pot-Karten aus `1:2`: Icon und Name stehen in der Karte (Manjari
+14 statt 11), Innenabstand 12, Karte 107 px hoch, Abstand zwischen Karten
+weiter 12 px. Geprüft in `e2e/masse.spec.ts` und per Bildvergleich
+(`design/figma/20-187_pot-card-v2.png`).
+
+- **Rechter Rand 18 statt 12 px.** In Figma ist die linke Spalte fest 202 px
+  breit und die Monat/Tag-Spalte folgt mit 6 px Abstand; dadurch endet sie
+  6 px vor dem Innenrand. Übernommen wie gezeichnet; falls symmetrisch
+  gemeint, ist es eine Zeile (`.potKopf` in `Dashboard.module.css`).
+- **Minus-Balken zweigeteilt.** Figma zeigt für „Drogen" zwei orange Teile
+  mit 1-px-Trennlinie in Kartenfarbe. Gedeutet als: links der Teil, der bis
+  heute zugeflossen war, rechts der Vorgriff (= das Minus). Das entspricht
+  der Vorgriff-Logik im Ausgaben-Sheet. Die Figma-Breiten (233 | 39 px) sind
+  wie in `1:2` Platzhalter; die App rechnet aus den Beträgen (85 € | 20 €
+  von 150 € → 190 | 45 px).
+- **Name 2 px tiefer als mittig.** Figma setzt die 11-px-Textzeile oben an
+  die Textbox; gemessen und per `translateY(2px)` nachgebildet.
+
 ## Abgeleitete Screens
 
 Nicht im Figma, aus dessen Formensprache gebaut. Neue Farben, Schriften oder

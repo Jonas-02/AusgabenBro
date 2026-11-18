@@ -88,11 +88,24 @@ export function potStand(pot: Pot, ausgaben: readonly Ausgabe[], heute: Tag, e: 
 /**
  * Balken einer Pot-Karte bzw. der Hauptkarte. Gesamtbreite = Monatsbudget.
  * Blau = ausgegeben, Hellgrau = noch verfuegbar vom Zugeflossenen, Rest leer.
- * Bei negativem Stand wird der ausgegebene Teil orange, ohne grauen Teil.
+ * Bei negativem Stand (Pot-Card v2, Figma 20:187) ist alles Ausgegebene
+ * orange, geteilt in den gedeckten Teil (bis heute verfuegbar) und den
+ * Vorgriff (= das Minus); die UI setzt dazwischen eine Trennlinie.
  */
 export function standBalken(s: { monatlich: Cent; zugeflossen: Cent; ausgegeben: Cent; stand: Cent }): Balken {
   const skala = Math.max(s.monatlich, s.ausgegeben, 1);
-  if (s.stand < 0) return { skala, segmente: [{ art: 'minus', cent: s.ausgegeben }] };
+  if (s.stand < 0) {
+    // verfuegbar = stand + ausgegeben (Zufluss plus Uebertrag); kann bei
+    // negativem Uebertrag selbst unter 0 liegen, dann ist alles Vorgriff.
+    const gedeckt = Math.max(Math.min(s.ausgegeben, s.stand + s.ausgegeben), 0);
+    return {
+      skala,
+      segmente: [
+        { art: 'minus', cent: gedeckt },
+        { art: 'vorgriff', cent: s.ausgegeben - gedeckt }
+      ]
+    };
+  }
   return {
     skala,
     segmente: [

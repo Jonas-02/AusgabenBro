@@ -10,6 +10,10 @@
   transition: width 160ms ease-out;
 }
 
+.trenner {
+  border-left: 1px solid var(--balken-trenner, var(--c-card));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .segment {
     transition: none;

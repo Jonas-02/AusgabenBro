@@ -1,7 +1,50 @@
 /* Figma 1:4: Karte mit Abstand 10, darin Kopfzeile und Verlauf (Abstand 12). */
-.hauptkarte,
-.potkarte {
+.hauptkarte {
   gap: 10px;
+}
+
+/* Pot-Card v2 (Figma 20:187): 1 + 77 Kopf + 28 Balken + 1 = 107 px. */
+.potkarte {
+  gap: 0;
+}
+
+/* Figma 20:189: p 12, Abstand 6. Die linke Spalte ist in Figma fest 202 px
+   breit, die rechte (97 px) folgt mit 6 px Abstand; rechts bleiben dadurch
+   18 statt 12 px Luft. Uebernommen als padding-right. */
+.potKopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 18px 12px 12px;
+}
+
+/* Figma 20:214: Name-Zeile 14 px, dann Betrag, Abstand 6. */
+.potLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Figma 20:211/20:196: Icon 14, Manjari 14, Abstand 6. Zeilenhoehe 14
+   statt 11 setzt die Schrift an dieselbe Stelle (beide mittig in 14 px)
+   und laesst lange Namen sauber umbrechen. */
+.potName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 14px;
+  font-size: 14px;
+  line-height: 14px;
+  overflow-wrap: break-word;
+}
+
+.potName > span {
+  min-width: 0;
+  /* Figma setzt die 11-px-Zeile oben an die Textbox (y 3), nicht mittig:
+     gemessen 2 px tiefer als zentriert. */
+  transform: translateY(2px);
 }
 
 .verlauf {

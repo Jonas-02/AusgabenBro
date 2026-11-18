@@ -66,9 +66,21 @@ describe('Balken', () => {
     expect(b).toEqual({ skala: 21_000, segmente: [{ art: 'ausgegeben', cent: 9_857 }, { art: 'rest', cent: 2_043 }] });
   });
 
-  it('Negativ: nur der ausgegebene Teil, orange, ohne grau (wie Pot „Drogen")', () => {
+  it('Negativ (Pot-Card v2): orange, geteilt in gedeckt und Vorgriff, ohne grau', () => {
     const b = standBalken({ monatlich: 15_000, zugeflossen: 9_000, ausgegeben: 11_000, stand: -2_000 });
-    expect(b.segmente).toEqual([{ art: 'minus', cent: 11_000 }]);
+    expect(b.segmente).toEqual([
+      { art: 'minus', cent: 9_000 },
+      { art: 'vorgriff', cent: 2_000 }
+    ]);
+  });
+
+  it('Negativ mit negativem Uebertrag: alles ist Vorgriff', () => {
+    // Uebertrag −5.000, zugeflossen 3.000 → verfuegbar −2.000
+    const b = standBalken({ monatlich: 15_000, zugeflossen: 3_000, ausgegeben: 1_000, stand: -3_000 });
+    expect(b.segmente).toEqual([
+      { art: 'minus', cent: 0 },
+      { art: 'vorgriff', cent: 1_000 }
+    ]);
   });
 
   it('Vorschau im Plus entspricht der Figma-Geometrie aus 7:4', () => {
