@@ -66,21 +66,25 @@ test.describe('Masse wie in Figma', () => {
     for (const z of '12') await page.getByRole('group', { name: 'Zahlenfeld' }).getByRole('button', { name: z, exact: true }).click();
     await schriftenBereit(page);
 
-    pruefe(await box(page, 'dialog'), { x: 0, y: 120, w: 393, h: 732 }, 'Sheet 7:93');
-    pruefe(await box(page, 'dialog [class*="_kopf_"]'), { x: 20, y: 146, w: 353, h: 28 }, 'Kopf 7:96');
-    pruefe(await box(page, 'dialog [class*="_eingabe_"]'), { x: 20, y: 188, h: 73 }, 'Eingabe 7:103');
+    // Abgeleitet: Notizfeld (36) + Abstand (8) unter den Chips. Das Sheet
+    // haengt unten, alles darueber rueckt um N nach oben.
+    const N = 44;
+    pruefe(await box(page, 'dialog'), { x: 0, y: 120 - N, w: 393, h: 732 + N }, 'Sheet 7:93');
+    pruefe(await box(page, 'dialog [class*="_kopf_"]'), { x: 20, y: 146 - N, w: 353, h: 28 }, 'Kopf 7:96');
+    pruefe(await box(page, 'dialog [class*="_eingabe_"]'), { x: 20, y: 188 - N, h: 73 }, 'Eingabe 7:103');
 
     const schnell = [{ x: 20, w: 52 }, { x: 80, w: 56 }, { x: 144, w: 59 }];
     for (const [i, q] of schnell.entries()) {
-      pruefe(await box(page, 'dialog [class*="_schnell_"] > button', i), { ...q, y: 271, h: 34 }, `Schnellbetrag ${i + 1}`, TEXTBREITE);
+      pruefe(await box(page, 'dialog [class*="_schnell_"] > button', i), { ...q, y: 271 - N, h: 34 }, `Schnellbetrag ${i + 1}`, TEXTBREITE);
     }
 
-    pruefe(await box(page, 'dialog [class*="_potWahl_"] > p'), { x: 20, y: 319, h: 13 }, 'Frage 7:109');
-    const chips = [{ x: 20, y: 340, w: 140 }, { x: 168, y: 340, w: 77 }, { x: 20, y: 378, w: 143 }, { x: 171, y: 378, w: 161 }];
+    pruefe(await box(page, 'dialog [class*="_potWahl_"] > p'), { x: 20, y: 319 - N, h: 13 }, 'Frage 7:109');
+    const chips = [{ x: 20, y: 340 - N, w: 140 }, { x: 168, y: 340 - N, w: 77 }, { x: 20, y: 378 - N, w: 143 }, { x: 171, y: 378 - N, w: 161 }];
     for (const [i, c] of chips.entries()) {
       pruefe(await box(page, 'dialog [class*="_chips_"] > button', i), { ...c, h: 30 }, `Chip ${i + 1}`, TEXTBREITE);
     }
 
+    pruefe(await box(page, 'dialog[open] input[aria-label="Notiz"]'), { x: 20, y: 422 - 14 - 36, w: 353, h: 36 }, 'Notiz (abgeleitet)');
     pruefe(await box(page, 'dialog [class*="_auswirkung_"]'), { x: 20, y: 422, w: 353, h: 116 }, 'Auswirkung 7:139');
     pruefe(await box(page, 'dialog [class*="_auswirkung_"] [class*="_balken_"]'), { x: 32, y: 490, w: 329, h: 12 }, 'Balken 7:147');
     pruefe(await box(page, 'dialog [class*="_status_"]'), { x: 32, y: 510, h: 16 }, 'Status 10:76');

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { vorbereiten, figmaDaten } from './hilfen';
+import { vorbereiten, figmaDaten, verlaufDaten } from './hilfen';
 import { spruchIndex } from '../src/domain/tagesspruch';
 import { SPRUECHE } from '../src/inhalt/sprueche';
 
@@ -552,6 +552,78 @@ test.describe('Analyse', () => {
     await expect(kosten.locator('.nur-screenreader').first()).toHaveText('1.596,18 €');
     await expect(kosten.locator('[class*="_posten_"]').first()).toContainText('Internet');
     await expect(kosten.locator('[class*="_posten_"]').first()).toContainText('in 3 Tagen');
+  });
+});
+
+test.describe('Notizen', () => {
+  const notizFeld = (page: Page) => page.locator('dialog[open] input[aria-label="Notiz"]');
+
+  test('Notiz erfassen, im Pot-Verlauf sehen, bearbeiten, in der Analyse wiederfinden', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/budget');
+    await neueAusgabe(page);
+    await sheet(page).getByRole('button', { name: 'Drogen' }).click();
+    await tippe(page, '8');
+    await notizFeld(page).fill('Zigaretten');
+    // Ziffern und Ruecktaste im Notizfeld aendern den Betrag nicht, Enter speichert nicht.
+    await notizFeld(page).press('End');
+    await page.keyboard.type(' 2');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Backspace');
+    await notizFeld(page).press('Enter');
+    await expect(sheet(page).locator('[class*="_eingabe_"] .nur-screenreader')).toHaveText('Betrag: 8 €');
+    await expect(sheet(page)).toHaveCount(1);
+    await page.getByRole('button', { name: 'Ausgabe speichern' }).click();
+    await sheetZu(page);
+
+    await page.getByRole('button', { name: /^Drogen:/ }).click();
+    const zeile = page.getByRole('button', { name: /Zigaretten/ });
+    await expect(zeile).toContainText('heute');
+    await expect(zeile).toContainText('8,00 €');
+
+    await zeile.click();
+    await sheetOffen(page);
+    await expect(notizFeld(page)).toHaveValue('Zigaretten');
+    await notizFeld(page).fill('  Zigaretten   Marlboro ');
+    await page.getByRole('button', { name: 'Änderung speichern' }).click();
+    await sheetZu(page);
+    await expect(page.getByRole('button', { name: /Zigaretten Marlboro/ })).toBeVisible();
+
+    await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Analyse' }).click();
+    const wofuer = page.locator('section[aria-labelledby="wofuer-titel"]');
+    await expect(wofuer.locator('li').first()).toContainText('Zigaretten Marlboro');
+    await expect(wofuer.locator('li').first()).toContainText('8 €');
+    await expect(wofuer).toContainText('ohne Notiz');
+  });
+
+  test('frühere Notizen werden vorgeschlagen, Schreibweisen zusammengefasst', async ({ page }) => {
+    await vorbereiten(page);
+    await page.goto('./#/budget');
+    for (const [betrag, notiz] of [['5', 'Zigaretten'], ['7', 'zigaretten']] as const) {
+      await neueAusgabe(page);
+      await sheet(page).getByRole('button', { name: 'Drogen' }).click();
+      await tippe(page, betrag);
+      await notizFeld(page).fill(notiz);
+      await page.getByRole('button', { name: 'Ausgabe speichern' }).click();
+      await sheetZu(page);
+    }
+    await neueAusgabe(page);
+    await expect(page.locator('dialog[open] datalist option[value="zigaretten"]')).toHaveCount(1);
+    await page.keyboard.press('Escape');
+
+    await page.goto('./#/analyse');
+    const erste = page.locator('section[aria-labelledby="wofuer-titel"] li').first();
+    await expect(erste).toContainText('12 €');
+    await expect(erste).toContainText('2×');
+  });
+
+  test('seit Beginn rechnet pro Monat hoch', async ({ page }) => {
+    await vorbereiten(page, { daten: verlaufDaten() });
+    await page.goto('./#/analyse');
+    const wofuer = page.locator('section[aria-labelledby="wofuer-titel"]');
+    await wofuer.getByRole('button', { name: 'seit Beginn' }).click();
+    await expect(wofuer.getByRole('button', { name: 'seit Beginn' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(wofuer.locator('li').filter({ hasText: 'Zigaretten' })).toContainText('im Monat');
   });
 });
 

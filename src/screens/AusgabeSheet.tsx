@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { addiere, ausBetrag, loesche, tasteVonKey, tippe, zuCent, type Taste } from '../domain/eingabe';
 import { euro } from '../domain/geld';
 import { vorschau, type Ausgleich } from '../domain/pot';
+import { NOTIZ_MAX, vorschlaege } from '../domain/notiz';
 import type { Ausgabe } from '../domain/typen';
 import { useStore } from '../store/store';
 import { BottomSheet } from '../ui/BottomSheet';
@@ -45,6 +46,8 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
   const [eingabe, setEingabe] = useState('');
   const [gewaehlt, setGewaehlt] = useState<string | null>(null);
   const [hinweis, setHinweis] = useState<string | null>(null);
+  const [notiz, setNotiz] = useState('');
+  const listeId = useId();
 
   // Beim Oeffnen vorbelegen: bearbeiteter Betrag bzw. zuletzt genutzter Pot.
   useEffect(() => {
@@ -53,8 +56,10 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
     if (bearbeiten) {
       setEingabe(ausBetrag(bearbeiten.cent));
       setGewaehlt(bearbeiten.potId);
+      setNotiz(bearbeiten.notiz ?? '');
     } else {
       setEingabe('');
+      setNotiz('');
       const vorschlag = potId ?? letzterPot;
       setGewaehlt(pots.some((p) => p.id === vorschlag) ? (vorschlag as string) : (pots[0]?.id ?? null));
     }
@@ -79,12 +84,14 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
       return;
     }
     if (bearbeiten) {
-      aendern(bearbeiten.id, { potId: pot.id, cent });
+      aendern(bearbeiten.id, { potId: pot.id, cent, notiz });
       onGespeichert(bearbeiten.id, false);
     } else {
-      onGespeichert(hinzufuegen(pot.id, cent), true);
+      onGespeichert(hinzufuegen(pot.id, cent, { notiz }), true);
     }
-  }, [pot, cent, bearbeiten, aendern, hinzufuegen, onGespeichert]);
+  }, [pot, cent, notiz, bearbeiten, aendern, hinzufuegen, onGespeichert]);
+
+  const vorschlagsliste = useMemo(() => (offen ? vorschlaege(ausgaben, gewaehlt) : []), [offen, ausgaben, gewaehlt]);
 
   // Hinweis "Betrag eingeben" nach kurzer Zeit wieder zuruecknehmen.
   useEffect(() => {
@@ -104,6 +111,9 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
     if (!offen) return undefined;
     const taste = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Im Notizfeld gehoeren Ziffern und Ruecktaste dem Text, nicht dem Betrag.
+      const ziel = e.target as HTMLElement | null;
+      if (ziel && (ziel.tagName === 'INPUT' || ziel.tagName === 'TEXTAREA' || ziel.isContentEditable)) return;
       const t = tasteVonKey(e.key);
       if (t) {
         e.preventDefault();
@@ -153,6 +163,30 @@ export function AusgabeSheet({ offen, potId, bearbeiten, heute, onSchliessen, on
             />
           ))}
         </div>
+        <input
+          className={`${f.feld} ${s.notiz}`}
+          type="text"
+          list={listeId}
+          aria-label="Notiz"
+          placeholder="wofür? z. B. Zigaretten"
+          autoComplete="off"
+          autoCapitalize="sentences"
+          enterKeyHint="done"
+          maxLength={NOTIZ_MAX}
+          value={notiz}
+          onChange={(e) => setNotiz(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
+        />
+        <datalist id={listeId}>
+          {vorschlagsliste.map((v) => (
+            <option key={v} value={v} />
+          ))}
+        </datalist>
       </div>
 
       {pot && v && (

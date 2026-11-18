@@ -6,7 +6,7 @@ import type { Ausgabe, Fixkosten, Kategorie, Pot, Rhythmus, Uebertrag } from '..
  * Gespeicherter Zustand. Jede Strukturaenderung erhoeht SCHEMA_VERSION und
  * bekommt einen Schritt in `migriere`.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export interface Daten {
   onboardingFertig: boolean;
@@ -33,6 +33,7 @@ export interface Exportdatei {
 /** Ueberfuehrt aeltere gespeicherte Staende in die aktuelle Struktur. */
 export function migriere(gespeichert: unknown, vonVersion: number): Daten {
   let stand = gespeichert as Record<string, unknown>;
+  // Version 3: optionale Notiz an Ausgaben; aeltere Daten brauchen nichts.
   // Version 2: Tagesspruch, fuer bestehende Daten eingeschaltet.
   if (vonVersion < 2 && stand && typeof stand === 'object' && !('tagesspruch' in stand)) stand = { ...stand, tagesspruch: true };
   if (vonVersion > SCHEMA_VERSION) {
@@ -69,7 +70,10 @@ function pruefePot(x: unknown): x is Pot {
 
 function pruefeAusgabe(x: unknown): x is Ausgabe {
   const a = x as Ausgabe;
-  return !!a && istText(a.id) && istText(a.potId) && istCent(a.cent) && a.cent > 0 && istTag(a.datum) && istText(a.erfasstUm);
+  return (
+    !!a && istText(a.id) && istText(a.potId) && istCent(a.cent) && a.cent > 0 && istTag(a.datum) && istText(a.erfasstUm) &&
+    (a.notiz === undefined || (istText(a.notiz) && a.notiz.length <= 200))
+  );
 }
 
 function pruefeFixkosten(x: unknown): x is Fixkosten {

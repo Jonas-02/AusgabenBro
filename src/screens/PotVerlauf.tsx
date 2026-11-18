@@ -73,9 +73,11 @@ export function PotVerlauf({ potId, heute, onBearbeiten }: Props) {
             {liste.map((a) => (
               <button key={a.id} type="button" className={l.posten} onClick={() => onBearbeiten(a)}>
                 <span className={l.info}>
-                  <span className={l.name}>{kurzDatum(a.datum)}</span>
+                  <span className={l.name}>{a.notiz ?? kurzDatum(a.datum)}</span>
                   <span className={l.unter}>
-                    {[relativerTag(a.datum, heute), `${UHRZEIT.format(new Date(a.erfasstUm))} Uhr`].filter(Boolean).join(' · ')}
+                    {[a.notiz ? (relativerTag(a.datum, heute) ?? kurzDatum(a.datum)) : relativerTag(a.datum, heute), `${UHRZEIT.format(new Date(a.erfasstUm))} Uhr`]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </span>
                 </span>
                 <span className={l.rechts}>

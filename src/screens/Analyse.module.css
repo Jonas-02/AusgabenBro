@@ -119,6 +119,25 @@
   color: var(--c-text-2);
 }
 
+.balkenUnter {
+  margin-top: 4px;
+  color: var(--c-text-2);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+/* Zeitraum-Umschalter: Chips wie Figma 7:4. Dort liegen sie auf der
+   Kartenfarbe; auf dem Seitenhintergrund bekommen inaktive Chips deshalb
+   die Kartenfarbe, sonst waeren sie unsichtbar. */
+.zeitraum {
+  display: flex;
+  gap: 8px;
+}
+
+.zeitraum > button[aria-pressed='false'] {
+  background: var(--c-card);
+}
+
 .balkenSpur {
   height: 8px;
 }

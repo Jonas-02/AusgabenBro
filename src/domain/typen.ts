@@ -24,6 +24,8 @@ export interface Ausgabe {
   datum: Tag;
   /** ISO-Zeitstempel der Erfassung, fuer stabile Sortierung am selben Tag. */
   erfasstUm: string;
+  /** Wofuer, frei formuliert ("Zigaretten"). Seit Schema-Version 3, optional. */
+  notiz?: string;
 }
 
 export interface Budgeteinstellung {

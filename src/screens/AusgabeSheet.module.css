@@ -60,6 +60,13 @@
   gap: 8px;
 }
 
+/* Notiz (abgeleitet): Feld wie Figma 12:201, aber 36 statt 40 px hoch,
+   damit das Sheet auf dem iPhone 14 Pro ohne Scrollen passt. */
+.potWahl > .notiz {
+  height: 36px;
+  line-height: 36px;
+}
+
 /* Figma 7:108 "Pot-Auswahl": Abstand 8. */
 .potWahl {
   display: flex;

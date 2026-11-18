@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   anstehend,
   kennzahlen,
@@ -13,6 +13,9 @@ import {
 import { differenz, kurzDatum, langDatum, monatsname, zerlege, type Tag } from '../domain/datum';
 import { euro, euro2, type Cent } from '../domain/geld';
 import { faelligkeit, faelligkeitText } from '../domain/fixkosten';
+import { nachNotiz } from '../domain/notiz';
+import type { Ausgabe, Pot } from '../domain/typen';
+import { Chip } from '../ui/Chip';
 import { useStore } from '../store/store';
 import { Betrag } from '../ui/Betrag';
 import { Icon, istSymbol } from '../ui/Icon';
@@ -77,6 +80,7 @@ export function Analyse({ heute }: { heute: Tag }) {
           <ProTag v={v} />
           <Kennzahlen k={k} v={v} pots={pots} />
           <Verteilung verteilung={verteilung} gesamt={v.ausgegeben} />
+          <Wofuer pots={pots} ausgaben={ausgaben} monatsstart={z.start} heute={heute} />
           <Zyklen zyklen={zyklen} />
           <Wochentage woche={woche} />
         </>
@@ -290,6 +294,74 @@ function Verteilung({ verteilung, gesamt }: { verteilung: ReturnType<typeof potV
           </ul>
         )}
       </Karte>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- Wofuer */
+
+const TAGE_PRO_MONAT = 365.25 / 12;
+
+/** Ausgaben nach Notiz ("Zigaretten", "Rewe"), fuer den Monat oder seit Beginn. */
+function Wofuer({ pots, ausgaben, monatsstart, heute }: { pots: readonly Pot[]; ausgaben: readonly Ausgabe[]; monatsstart: Tag; heute: Tag }) {
+  const [zeitraum, setZeitraum] = useState<'monat' | 'alles'>('monat');
+  const ids = useMemo(() => new Set(pots.map((p) => p.id)), [pots]);
+  const erster = useMemo(
+    () => ausgaben.filter((x) => ids.has(x.potId) && x.datum <= heute).reduce<Tag | null>((m, x) => (m === null || x.datum < m ? x.datum : m), null),
+    [ausgaben, ids, heute]
+  );
+  const von = zeitraum === 'monat' ? monatsstart : (erster ?? monatsstart);
+  const tage = differenz(heute, von) + 1;
+  const r = useMemo(() => nachNotiz(ausgaben, ids, von, heute, 8), [ausgaben, ids, von, heute]);
+  const max = Math.max(...r.eintraege.map((e) => e.summe), r.sonstige.summe, r.ohneNotiz.summe, 1);
+  const proMonat = (c: Cent) => (zeitraum === 'alles' && tage >= 28 ? ` · ≈ ${euro(Math.round((c * TAGE_PRO_MONAT) / tage))} im Monat` : '');
+  const zeile = (name: string, summe: Cent, anzahl: number, farbe: string, extra = '') => (
+    <li key={name}>
+      <div className={a.balkenKopf}>
+        <span className={a.balkenName}>{name}</span>
+        <span className={a.balkenWert}>
+          <span className={s.zahl}>{euro(summe)}</span>
+          <span className={a.anteil}> · {prozent(r.gesamt > 0 ? summe / r.gesamt : 0)}</span>
+        </span>
+      </div>
+      <div className={a.balkenSpur} aria-hidden="true">
+        {summe > 0 && <div className={a.balken} style={{ width: `${(summe / max) * 100}%`, background: farbe }} />}
+      </div>
+      <p className={a.balkenUnter}>
+        {anzahl}× · Ø {euro(Math.round(summe / Math.max(anzahl, 1)))}
+        {extra}
+      </p>
+    </li>
+  );
+
+  return (
+    <section className={s.abschnitt} aria-labelledby="wofuer-titel">
+      <h2 id="wofuer-titel" className={s.abschnittTitel}>
+        Wofür
+      </h2>
+      <div className={a.zeitraum} role="group" aria-label="Zeitraum">
+        <Chip label="dieser Monat" aktiv={zeitraum === 'monat'} onClick={() => setZeitraum('monat')} />
+        <Chip label="seit Beginn" aktiv={zeitraum === 'alles'} onClick={() => setZeitraum('alles')} />
+      </div>
+      <Karte className={a.listeKarte}>
+        {r.eintraege.length === 0 ? (
+          <p className={a.hinweis}>
+            {r.gesamt === 0
+              ? 'In diesem Zeitraum noch nichts ausgegeben.'
+              : 'Noch keine Notizen. Schreib beim Erfassen dazu, wofür: Dann siehst du hier zum Beispiel, was dich Zigaretten kosten.'}
+          </p>
+        ) : (
+          <ul className={a.balkenListe}>
+            {r.eintraege.map((e) => zeile(e.name, e.summe, e.anzahl, 'var(--c-accent)', proMonat(e.summe)))}
+            {r.sonstige.arten > 0 &&
+              zeile(`${r.sonstige.arten} weitere`, r.sonstige.summe, r.sonstige.anzahl, 'var(--c-accent-45)')}
+            {r.ohneNotiz.anzahl > 0 && zeile('ohne Notiz', r.ohneNotiz.summe, r.ohneNotiz.anzahl, 'var(--c-inactive)')}
+          </ul>
+        )}
+      </Karte>
+      {zeitraum === 'alles' && tage < 28 && r.eintraege.length > 0 && (
+        <p className={a.fussnote}>Hochrechnung pro Monat ab 4 Wochen Daten, bisher {tage === 1 ? '1 Tag' : `${tage} Tage`}.</p>
+      )}
     </section>
   );
 }

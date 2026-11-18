@@ -133,6 +133,7 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
       await page.goto('./#/analyse');
       await schriftenBereit(page);
       await page.screenshot({ path: `${ORDNER}/${info.project.name}/abgeleitet_analyse.png`, fullPage: true, animations: 'disabled' });
+      await page.locator('section[aria-labelledby="wofuer-titel"]').screenshot({ path: `${ORDNER}/${info.project.name}/abgeleitet_analyse-wofuer.png`, animations: 'disabled' });
       // Antippen zeigt den Wert eines Tages
       await page.getByRole('img', { name: /Ausgaben pro Tag/ }).click({ position: { x: 200, y: 60 } });
       await foto(page, info.project.name, 'abgeleitet_analyse-antippen');
@@ -154,6 +155,17 @@ test.describe('Screenshots fuer die visuelle Abnahme', () => {
       await schriftenBereit(page);
       await page.locator('main [class*="_potkarte_"]').nth(1).screenshot({ path: `${ORDNER}/${info.project.name}/20-187_pot-card-v2.png`, animations: 'disabled' });
     });
+  });
+
+  test('Ausgabe mit Notiz', async ({ page }, info) => {
+    await vorbereiten(page);
+    await page.goto('./#/budget');
+    await page.getByRole('button', { name: 'Ausgabe hinzufügen' }).click();
+    await sheetOffen(page);
+    await tippe(page, '8');
+    await page.locator('dialog[open] input[aria-label="Notiz"]').fill('Zigaretten');
+    await page.locator('dialog[open] input[aria-label="Notiz"]').blur();
+    await foto(page, info.project.name, 'abgeleitet_ausgabe-notiz');
   });
 });
 

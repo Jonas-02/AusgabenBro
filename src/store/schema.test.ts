@@ -53,6 +53,19 @@ describe('Schema', () => {
     expect(pruefe(ohne).ok).toBe(false);
   });
 
+  it('akzeptiert Ausgaben mit Notiz und Daten aus Version 2 ohne Notiz', () => {
+    const mit = gueltig();
+    Object.assign(mit.ausgaben[0]!, { notiz: 'Zigaretten' });
+    expect(pruefe(mit).ok).toBe(true);
+    expect(migriere(gueltig(), 2).ausgaben[0]?.notiz).toBeUndefined();
+  });
+
+  it('lehnt eine Notiz ab, die kein Text ist', () => {
+    const d = gueltig();
+    (d.ausgaben[0] as unknown as { notiz: number }).notiz = 5;
+    expect(pruefe(d).ok).toBe(false);
+  });
+
   it('Export und Import ergeben dieselben Daten', () => {
     const datei = { app: 'ausgabenbro', version: SCHEMA_VERSION, exportiertAm: 'x', daten: gueltig() };
     const r = leseExport(JSON.stringify(datei));

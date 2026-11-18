@@ -267,6 +267,29 @@ großer Einkauf am Monatsanfang verzerrt sie. Deshalb erst ab Tag 3. Der
 **Wochentage** mitteln über alle Tage seit dem ersten Pot, auch Tage ohne
 Ausgabe; unter 4 Wochen steht ein Hinweis, dass die Werte wenig aussagen.
 
+### Notizen an Ausgaben
+Nachträglicher Wunsch. Optionales Feld `notiz` (max. 60 Zeichen, Leerzeichen
+bereinigt) → Schema-Version 3; ältere Daten und Sicherungen bleiben gültig.
+
+- **Im Ausgaben-Sheet** steht das Feld unter den Pot-Chips, Stil wie Figma
+  `12:201`, aber **36 statt 40 px hoch und 8 statt 14 px Abstand**: Auf dem
+  iPhone 14 Pro hat das Sheet höchstens 781 px (852 − 59 Dynamic Island − 12).
+  Mit 40 px und 14 px Abstand wären es 786 px, „Speichern" läge außerhalb.
+  So sind es 776 px. Alles über dem Feld rückt gegenüber `7:4` um 44 px nach
+  oben, alles darunter bleibt pixelgleich (`e2e/masse.spec.ts`).
+- Die 3-Tap-Erfassung bleibt: Die Notiz ist optional.
+- Solange das Notizfeld den Fokus hat, ignoriert der Hardware-Tastatur-Listener
+  des Zahlenfelds Ziffern und Rücktaste; Enter schließt nur die Tastatur.
+- **Vorschläge** über `<datalist>` (iOS zeigt sie über der Tastatur): frühere
+  Notizen, die des gewählten Pots zuerst. Das hält die Schreibweise einheitlich,
+  sonst zerfällt „Zigaretten" in der Auswertung in mehrere Einträge.
+- **Auswertung „Wofür"** in der Analyse: gruppiert ohne Rücksicht auf Groß-/
+  Kleinschreibung, angezeigt wird die häufigste Schreibweise. Die 8 größten
+  Posten einzeln, der Rest als „n weitere", dazu „ohne Notiz" in Grau.
+  Umschaltbar „dieser Monat" / „seit Beginn"; ab 4 Wochen Daten mit
+  Hochrechnung pro Monat (Summe × 30,44 / Tage). Synonyme („Kippen" vs.
+  „Zigaretten") werden nicht zusammengeführt; dafür sind die Vorschläge da.
+
 ### Texte aus dem Figma
 „a month" und „daily" bleiben englisch, wie im Figma. Das Start-Motto ist
 der Figma-Text und in den Einstellungen änderbar.

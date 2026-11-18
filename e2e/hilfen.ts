@@ -75,7 +75,7 @@ export async function vorbereiten(page: Page, { daten = figmaDaten(), homeIndika
   await page.addInitScript(
     ({ zustand, indikator }) => {
       if (zustand && !sessionStorage.getItem('vorbereitet')) {
-        localStorage.setItem('ausgabenbro', JSON.stringify({ state: zustand, version: 2 }));
+        localStorage.setItem('ausgabenbro', JSON.stringify({ state: zustand, version: 3 }));
         sessionStorage.setItem('vorbereitet', 'ja');
       }
       if (indikator) {
@@ -100,6 +100,13 @@ export async function schriftenBereit(page: Page) {
  * Drei Monate Ausgaben (1.9.–17.11.2026) mit festem Zufall, fuer die
  * Analyse-Seite. Gleiche Pots und Fixkosten wie figmaDaten.
  */
+const NOTIZEN: Record<string, string[]> = {
+  einkauf: ['Rewe', 'Rewe', 'Lidl', 'dm'],
+  drogen: ['Zigaretten', 'Zigaretten', 'Zigaretten', 'Energydrink'],
+  lifestyle: ['Zalando', 'Friseur'],
+  sonstiges: ['Döner', 'Bar', 'Kino', 'Lieferando']
+};
+
 export function verlaufDaten() {
   const basis = figmaDaten();
   let saat = 42;
@@ -117,7 +124,16 @@ export function verlaufDaten() {
     const anzahl = zufall() < 0.3 ? 0 : wochenende ? 2 : 1;
     for (let i = 0; i < anzahl; i++) {
       const pot = pots[Math.floor(zufall() * pots.length)]!;
-      ausgaben.push({ id: `v${n++}`, potId: pot.id, cent: Math.round(400 + zufall() * (wochenende ? 3_800 : 1_800)), datum: tag, erfasstUm: `${tag}T12:00:00Z` });
+      const notizen = NOTIZEN[pot.id] ?? [];
+      const notiz = zufall() < 0.85 ? notizen[Math.floor(zufall() * notizen.length)] : undefined;
+      ausgaben.push({
+        id: `v${n++}`,
+        potId: pot.id,
+        cent: Math.round(400 + zufall() * (wochenende ? 3_800 : 1_800)),
+        datum: tag,
+        erfasstUm: `${tag}T12:00:00Z`,
+        ...(notiz ? { notiz } : {})
+      });
     }
   }
   return { ...basis, pots, ausgaben };

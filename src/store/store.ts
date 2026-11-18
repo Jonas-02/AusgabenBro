@@ -5,6 +5,7 @@ import { heute, type Tag } from '../domain/datum';
 import { zyklusVon } from '../domain/zyklus';
 import type { Ausgabe, Fixkosten, Kategorie, Pot, Uebertrag } from '../domain/typen';
 import { SCHEMA_VERSION, migriere, type Daten, type Exportdatei } from './schema';
+import { bereinige } from '../domain/notiz';
 import { leereDaten } from './startwerte';
 
 export interface PotEntwurf {
@@ -17,8 +18,8 @@ interface Aktionen {
   onboardingAbschliessen(name: string, zahltag: number, pots: PotEntwurf[]): void;
   profilSetzen(teil: Partial<Pick<Daten, 'name' | 'motto' | 'tagesspruch' | 'zahltag'>> & { uebertrag?: Uebertrag }): void;
 
-  ausgabeHinzufuegen(potId: string, cent: Cent, datum?: Tag): string;
-  ausgabeAendern(id: string, teil: { potId: string; cent: Cent }): void;
+  ausgabeHinzufuegen(potId: string, cent: Cent, extra?: { notiz?: string | undefined; datum?: Tag | undefined }): string;
+  ausgabeAendern(id: string, teil: { potId: string; cent: Cent; notiz?: string | undefined }): void;
   ausgabeLoeschen(id: string): Ausgabe | null;
   ausgabeWiederherstellen(a: Ausgabe): void;
 
@@ -94,17 +95,23 @@ export const useStore = create<Store>()(
         }));
       },
 
-      ausgabeHinzufuegen(potId, cent, datum = heute()) {
+      ausgabeHinzufuegen(potId, cent, extra = {}) {
         const id = neueId();
-        set((s) => ({
-          ausgaben: [...s.ausgaben, { id, potId, cent, datum, erfasstUm: new Date().toISOString() }],
-          letzterPot: potId
-        }));
+        const notiz = bereinige(extra.notiz);
+        const a: Ausgabe = { id, potId, cent, datum: extra.datum ?? heute(), erfasstUm: new Date().toISOString(), ...(notiz ? { notiz } : {}) };
+        set((s) => ({ ausgaben: [...s.ausgaben, a], letzterPot: potId }));
         return id;
       },
 
-      ausgabeAendern(id, teil) {
-        set((s) => ({ ausgaben: s.ausgaben.map((a) => (a.id === id ? { ...a, ...teil } : a)) }));
+      ausgabeAendern(id, { potId, cent, notiz }) {
+        const sauber = bereinige(notiz);
+        set((s) => ({
+          ausgaben: s.ausgaben.map((a) => {
+            if (a.id !== id) return a;
+            const { notiz: _alt, ...rest } = a;
+            return { ...rest, potId, cent, ...(sauber ? { notiz: sauber } : {}) };
+          })
+        }));
       },
 
       ausgabeLoeschen(id) {
