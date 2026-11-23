@@ -26,7 +26,39 @@ body {
 
 body {
   min-height: 100dvh;
-  overscroll-behavior-y: none;
+}
+
+/* Wie eine native App:
+   - kein Doppeltipp-Zoom (touch-action; Pinch-Zoom faengt src/nativ.ts ab)
+   - kein Gummiband-Effekt am Seitenrand
+   - kein Markieren von Text und kein Kontextmenue/Link-Vorschau beim langen
+     Druecken, ausser in Eingabefeldern
+   - kein grauer Tipp-Blitz */
+html {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+:where(*) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(input, textarea, select, [contenteditable='true']) {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+img,
+svg {
+  -webkit-user-drag: none;
 }
 
 /* Keine Scrollbalken, weder auf der Seite noch im Sheet. Scrollen geht

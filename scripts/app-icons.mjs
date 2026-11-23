@@ -17,7 +17,8 @@ const wallet = readFileSync('design/figma/icons/wallet.svg', 'utf8')
 function svg(anteil) {
   const icon = 22 / anteil;
   const versatz = (icon - 22) / 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-versatz} ${-versatz} ${icon} ${icon}">
+  // fill="none": Die Wallet-Pfade sind reine Linien; ohne das fuellt SVG sie schwarz.
+  return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="${-versatz} ${-versatz} ${icon} ${icon}">
   <rect x="${-versatz}" y="${-versatz}" width="${icon}" height="${icon}" fill="#1E1E1E"/>
   ${wallet}
 </svg>`;

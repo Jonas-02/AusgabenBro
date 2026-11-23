@@ -12,7 +12,8 @@
     "test": "TZ=Europe/Berlin vitest run",
     "test:watch": "TZ=Europe/Berlin vitest",
     "e2e": "playwright test",
-    "icons": "node scripts/app-icons.mjs"
+    "icons": "node scripts/app-icons.mjs",
+    "startbilder": "node scripts/startbilder.mjs"
   },
   "dependencies": {
     "@fontsource/manjari": "^5.3.0",

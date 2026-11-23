@@ -31,6 +31,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2,svg,png}'],
+        // Startbilder holt iOS beim Installieren selbst; nicht offline cachen.
+        globIgnores: ['**/splash/**'],
         navigateFallback: BASE + 'index.html'
       }
     })

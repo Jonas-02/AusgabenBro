@@ -342,6 +342,28 @@ Ziffer löschen", damit sie nicht mit „Löschen" (Ausgabe löschen) verwechsel
 wird. Nach jedem Onboarding-Schritt springt der Fokus auf die neue
 Überschrift.
 
+## Wie eine native App
+
+Nachträglicher Wunsch: kein Zoomen, möglichst natives Gefühl.
+
+| Maßnahme | Wo |
+| --- | --- |
+| Pinch-Zoom aus: `maximum-scale=1, user-scalable=no` im Viewport. Safari ignoriert das seit iOS 10, deshalb zusätzlich die Safari-Gesten (`gesturestart/-change/-end`) und Zwei-Finger-Bewegungen abbrechen | `index.html`, `src/nativ.ts` |
+| Doppeltipp-Zoom aus: `touch-action: manipulation` auf `html` | `base.css` |
+| Kein Markieren, keine Lupe, kein Kontextmenü/Link-Vorschau beim langen Drücken; in Eingabefeldern weiter erlaubt | `base.css` |
+| Kein grauer Tipp-Blitz, kein Gummiband-Effekt (`overscroll-behavior: none`), Bilder/Icons nicht ziehbar | `base.css` |
+| Gedrückt-Zustände (`:active`) erscheinen auf iOS: leerer passiver `touchstart`-Listener | `src/nativ.ts` |
+| Startbilder für 12 iPhone-Größen statt weißem Aufblitzen beim Start; nicht im Offline-Cache | `scripts/startbilder.mjs`, `public/splash/` |
+| Hochformat im Manifest (Android; iOS ignoriert das) | `vite.config.ts` |
+
+**Zielkonflikt Barrierefreiheit:** Ohne Zoom gibt es in der App selbst keine
+Möglichkeit mehr, Inhalte zu vergrößern (WCAG 1.4.4). Die Systemfunktion
+Einstellungen → Bedienungshilfen → Zoom wirkt weiterhin. Für eine persönliche
+App so gewünscht; für eine App für Dritte würde ich das nicht abschalten.
+
+**App-Icon korrigiert:** Beim Erzeugen fehlte `fill="none"`, das Wallet hatte
+deshalb einen schwarzen Keil. Behoben in `scripts/app-icons.mjs`.
+
 ## Große Schrift
 
 Die App nutzt feste Pixelgrößen wie Figma. iOS-Dynamic-Type wirkt in Safari

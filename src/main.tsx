@@ -8,9 +8,12 @@ import '@fontsource/momo-trust-display/latin-400.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import { App } from './App';
+import { wieNativ } from './nativ';
 
 const wurzel = document.getElementById('root');
 if (!wurzel) throw new Error('#root fehlt in index.html');
+
+wieNativ();
 
 createRoot(wurzel).render(
   <StrictMode>
