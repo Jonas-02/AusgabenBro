@@ -48,6 +48,11 @@
   filter: brightness(1.12);
 }
 
+.datenZeile:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .bestaetigungText {
   color: var(--c-text-2);
   font-size: 15px;

@@ -627,3 +627,56 @@ test.describe('Notizen', () => {
   });
 });
 
+test.describe('Nur Ausgaben löschen', () => {
+  // Drei Monate Ausgaben, Uebertrag "mitnehmen": Hier faellt auf, wenn
+  // geloeschte Vormonate als gespart zaehlen.
+  const daten = () => ({ ...verlaufDaten(), uebertrag: 'carry' as const });
+
+  async function ausgabenLoeschen(page: Page) {
+    await page.goto('./#/einstellungen');
+    await page.getByRole('button', { name: /Alle Ausgaben löschen/ }).click();
+    await sheetOffen(page);
+    await expect(sheet(page)).toContainText('Pots, Fixkosten, Kategorien und Einstellungen bleiben');
+    await page.getByRole('button', { name: 'Ausgaben löschen', exact: true }).click();
+    await sheetZu(page);
+  }
+
+  test('Ausgaben weg, Pots, Fixkosten und Einstellungen bleiben, kein Phantom-Übertrag', async ({ page }) => {
+    await vorbereiten(page, { daten: daten() });
+    await ausgabenLoeschen(page);
+
+    await expect(page.getByLabel('dein Name')).toHaveValue('Jonas');
+    await expect(page.getByRole('button', { name: /Alle Ausgaben löschen/ })).toBeDisabled();
+    await expect(page.getByText('keine Ausgaben gespeichert')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'mitnehmen' })).toHaveAttribute('aria-pressed', 'true');
+
+    await page.goto('./#/budget');
+    await expect(page.locator('main [class*="_potkarte_"]')).toHaveCount(4);
+    // 17.11.: nur das Zugeflossene, 210 € × 17/30 = 119 €, ohne Übertrag aus Sep./Okt.
+    await expect(potBetrag(page, 0)).toHaveText('119 €');
+
+    await page.goto('./#/fixkosten');
+    await expect(page.getByText('9 Posten')).toBeVisible();
+
+    await page.goto('./#/analyse');
+    await expect(page.locator('section[aria-labelledby="zyklen-titel"]')).toContainText('Ab dem nächsten Monat');
+
+    await page.reload();
+    await page.goto('./#/budget');
+    await expect(potBetrag(page, 0)).toHaveText('119 €');
+  });
+
+  test('Rückgängig holt Ausgaben und Pot-Verlauf zurück', async ({ page }) => {
+    await vorbereiten(page, { daten: daten() });
+    await page.goto('./#/budget');
+    const vorher = await potBetrag(page, 0).textContent();
+    expect(vorher).not.toBe('119 €');
+
+    await ausgabenLoeschen(page);
+    await page.getByRole('button', { name: 'Rückgängig' }).click();
+    await expect(page.getByRole('button', { name: /Alle Ausgaben löschen/ })).toBeEnabled();
+    await page.goto('./#/budget');
+    await expect(potBetrag(page, 0)).toHaveText(vorher ?? '');
+  });
+});
+

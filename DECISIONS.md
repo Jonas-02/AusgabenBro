@@ -208,6 +208,16 @@ her. Nur „Alle Daten löschen" und „Importieren" fragen vorher nach, weil si
 alles ersetzen. Beide lassen sich danach trotzdem 8 bzw. 5 Sekunden lang
 rückgängig machen.
 
+### Nur Ausgaben löschen
+Nachträglicher Wunsch: Einstellungen → „Alle Ausgaben löschen" entfernt alle
+Ausgaben samt Notizen; Pots (Name, Symbol, aktueller Betrag, Reihenfolge),
+Fixkosten, Kategorien und Einstellungen bleiben. Zusätzlich beginnen die Pots
+heute neu (`erstelltAm` und Betragsverlauf). Ohne das würden im Modus
+„mitnehmen" die geleerten Vormonate als voll gespart zählen (Übertrag =
+Monatsbetrag × Monate), und der Monatsvergleich zeigte leere Monate. Der
+laufende Monat ändert sich dadurch nicht: Zugeflossen wird wie immer ab
+Zyklusbeginn. Mit Rückfrage und 8 Sekunden „Rückgängig".
+
 ### Pot mitten im Zyklus anlegen
 Die Formel aus 3.3 rechnet ab Zyklusbeginn. Ein am 17. angelegter Pot hat
 damit sofort 17/30 seines Monatsbetrags. Das passt zum Onboarding (der

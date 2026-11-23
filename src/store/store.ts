@@ -37,6 +37,12 @@ interface Aktionen {
   importieren(daten: Daten): void;
   exportieren(): Exportdatei;
   allesLoeschen(): void;
+  /**
+   * Loescht alle Ausgaben; Pots, Fixkosten, Kategorien und Einstellungen
+   * bleiben. Die Pots beginnen heute neu (erstelltAm, Betragsverlauf), damit
+   * Uebertrag und Monatsvergleich keine leeren Vormonate als gespart werten.
+   */
+  ausgabenZuruecksetzen(): void;
 }
 
 export type Store = Daten & Aktionen;
@@ -210,6 +216,14 @@ export const useStore = create<Store>()(
 
       allesLoeschen() {
         set({ ...leereDaten() });
+      },
+
+      ausgabenZuruecksetzen() {
+        const t = heute();
+        set((s) => ({
+          ausgaben: [],
+          pots: s.pots.map((p) => ({ ...p, erstelltAm: t, betraege: [{ ab: t, cent: p.betraege[p.betraege.length - 1]?.cent ?? 0 }] }))
+        }));
       }
     }),
     {

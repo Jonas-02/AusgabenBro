@@ -44,6 +44,8 @@ export function Einstellungen({ heute, zeigeToast }: Props) {
   const [potSheet, setPotSheet] = useState<{ offen: boolean; index?: number | undefined }>({ offen: false });
   const [importDaten, setImportDaten] = useState<Daten | null>(null);
   const [loeschenFrage, setLoeschenFrage] = useState(false);
+  const [ausgabenFrage, setAusgabenFrage] = useState(false);
+  const anzahlAusgaben = st.ausgaben.length;
   const dateiFeld = useRef<HTMLInputElement>(null);
 
   const bearbeitet = potSheet.index !== undefined ? st.pots[potSheet.index] : undefined;
@@ -71,6 +73,13 @@ export function Einstellungen({ heute, zeigeToast }: Props) {
     st.importieren({ ...importDaten, onboardingFertig: true });
     setImportDaten(null);
     zeigeToast({ text: 'Importiert', aktion: { label: 'Rückgängig', onClick: () => st.importieren(vorher) } });
+  }
+
+  function ausgabenLoeschen() {
+    const vorher = st.exportieren().daten;
+    setAusgabenFrage(false);
+    st.ausgabenZuruecksetzen();
+    zeigeToast({ text: 'Ausgaben gelöscht', aktion: { label: 'Rückgängig', onClick: () => st.importieren(vorher) }, dauerMs: 8000 });
   }
 
   function allesLoeschen() {
@@ -200,6 +209,16 @@ export function Einstellungen({ heute, zeigeToast }: Props) {
               <span className={l.unter}>aus einer Sicherung, ersetzt alles hier</span>
             </span>
           </button>
+          <button type="button" className={`${l.posten} ${e.datenZeile}`} onClick={() => setAusgabenFrage(true)} disabled={anzahlAusgaben === 0}>
+            <span className={l.info}>
+              <span className={`${l.name} ${s.minus}`}>Alle Ausgaben löschen</span>
+              <span className={l.unter}>
+                {anzahlAusgaben === 0
+                  ? 'keine Ausgaben gespeichert'
+                  : `${anzahlAusgaben === 1 ? '1 Ausgabe' : `${anzahlAusgaben} Ausgaben`}, Pots und Fixkosten bleiben`}
+              </span>
+            </span>
+          </button>
           <button type="button" className={l.posten} onClick={() => setLoeschenFrage(true)}>
             <span className={l.info}>
               <span className={`${l.name} ${s.minus}`}>Alle Daten löschen</span>
@@ -262,6 +281,20 @@ export function Einstellungen({ heute, zeigeToast }: Props) {
             Fixkosten. Sie ersetzt alles, was gerade auf diesem Gerät ist.
           </p>
         )}
+      </Bestaetigung>
+
+      <Bestaetigung
+        offen={ausgabenFrage}
+        titel="Alle Ausgaben löschen?"
+        aktion="Ausgaben löschen"
+        gefahr
+        onBestaetigen={ausgabenLoeschen}
+        onSchliessen={() => setAusgabenFrage(false)}
+      >
+        <p>
+          {anzahlAusgaben === 1 ? '1 Ausgabe wird' : `${anzahlAusgaben} Ausgaben werden`} gelöscht, mit Notizen. Pots, Fixkosten,
+          Kategorien und Einstellungen bleiben. Übertrag und Monatsvergleich fangen in diesem Monat neu an.
+        </p>
       </Bestaetigung>
 
       <Bestaetigung
