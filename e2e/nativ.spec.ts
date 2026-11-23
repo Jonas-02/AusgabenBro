@@ -36,6 +36,10 @@ test('kein Markieren ausser in Eingabefeldern, Tippen geht weiter', async ({ pag
   expect(await auswahl('main [class*="_posten_"]')).toBe('none');
   expect(await auswahl('input[type="text"]')).toBe('text');
 
+  // Verhalten statt nur Stil: Dreifachklick markiert keinen Text.
+  await page.locator('main h1').click({ clickCount: 3 });
+  expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
+
   await page.getByLabel('dein Name').fill('Kim');
   await expect(page.getByLabel('dein Name')).toHaveValue('Kim');
 });

@@ -42,6 +42,11 @@ html {
 
 body {
   overscroll-behavior: none;
+}
+
+/* An jedem Element, nicht nur am body: WebKit vererbt user-select nicht
+   in den berechneten Stil (meldet "auto"); so gilt es sicher ueberall. */
+:where(body, body *) {
   -webkit-user-select: none;
   user-select: none;
 }
